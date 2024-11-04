@@ -70,14 +70,19 @@ public class TeleopStart extends LinearOpMode {
         waitForStart();
         runtime.reset();
         int ticks;
+        int target;
         double power;
         double velocity;
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            ticks = robot.liftSimple(gamepad1.dpad_up,gamepad1.dpad_down);
+            //robot.liftSimple(gamepad1.dpad_up,gamepad1.dpad_down);
+            ticks = robot.lift1.getCurrentPosition();
+            target = robot.lift1.getTargetPosition();
             power = robot.lift1.getPower();
             velocity = robot.lift1.getVelocity();
             telemetry.addData("Current Vertical Ticks:", ticks);
+            telemetry.addData("Current Vertical Target Ticks:", target);
             telemetry.addData("Current Vertical Power:", power);
             telemetry.addData("Current Vertical Velocity:", velocity);
             telemetry.update();
