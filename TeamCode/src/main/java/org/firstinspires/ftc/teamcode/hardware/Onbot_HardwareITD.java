@@ -22,7 +22,7 @@ public class Onbot_HardwareITD {
     // DEFINE OPMORE MEMBERS
     private LinearOpMode myOpMode;
 
-    // ACCESS INSTRUMENTS OF HUB
+    // ACCESS INSxTRUMENTS OF HUB
     public IMU imu;
     Orientation angle;
     double botHeading;

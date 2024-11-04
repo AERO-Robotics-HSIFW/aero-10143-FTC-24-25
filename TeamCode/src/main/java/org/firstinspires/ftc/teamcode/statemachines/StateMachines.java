@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,12 +27,18 @@ public class StateMachines {
     */
     Onbot_HardwareITD hardware = null;
     ElapsedTime runtime;
+    public int curLiftTargetPos;
+
+    // Constructor initializing
     public StateMachines(){
         hardware = new Onbot_HardwareITD();
         runtime = new ElapsedTime();
+        curLiftTargetPos = 0;
     }
 
+    // All possible states the robot can be in
     public enum robotStates {
+        IDLE,
         LIFT_START,
         LIFT_EXTEND,
         LIFT_GRAB,
@@ -41,14 +48,38 @@ public class StateMachines {
         INTAKE_RETRACT,
         INTAKE_TRANSFER,
         ARMS_OUT,
-        ARMS_IN
+        ARMS_IN,
+        MANUAL
     }
     robotStates robotState = robotStates.INTAKE_EXTEND;
 
-    public void run() {
+    public void stateAction() {
+        // Need assistance
+    }
+
+    // Taking the inputs from the teleop file, and translating the binds to their perspective states
+    public void inputTranslation(Gamepad input1, Gamepad input2) {
+        gamepad1 = input1;
+        gamepad2 = input2;
+
+        if (gamepad2.a) {
+            robotState = robotStates.INTAKE_EXTEND;
+        } else if(gamepad2.b) { // B is supposed to reverse the intake, but how would that be written in a state machine?
+            // Ask about
+        } else if (gamepad1.dpad_up) {
+            robotState = robotStates.LIFT_EXTEND;
+        } else if (gamepad1.dpad_down) {
+            robotState = robotStates.LIFT_RETRACT;
+        } else {
+            robotState = robotStates.IDLE;
+        }
+    }
+
+    // The actual state machine logic
+    public void stateMachineLogic() {
         switch (robotState) {
             case INTAKE_EXTEND:
-                hardware.intakeState(false,gamepad2.b);
+                hardware.intakeState(gamepad2.b,gamepad2.a);
                 hardware.horizontalSys(gamepad2.dpad_up?0.5:(gamepad2.dpad_down?-0.5:0), gamepad2.b);
 
                 if(gamepad2.a) {
@@ -71,11 +102,11 @@ public class StateMachines {
                 break;
 
             case INTAKE_TRANSFER:
-
                 hardware.arms(false,true);
                 if(runtime.milliseconds() > 500){
                     robotState = robotStates.LIFT_GRAB;
                 }
+                break;
 
             case LIFT_GRAB:
                 // Ralph said he'd do this one
@@ -83,7 +114,7 @@ public class StateMachines {
                 robotState = robotStates.LIFT_EXTEND;
 
             case LIFT_EXTEND:
-                hardware.arms("out","ur mom"/*this changes absolutely nothing - ralph (this is targetted at you kevin, in case u ever see this :)*/);
+                hardware.arms("out","ur mom"/*this changes absolutely nothing - ralph (this is targeted at you kevin, in case u ever see this :)*/);
                 if(runtime.milliseconds() > 500) {
                     robotState = robotStates.ARMS_OUT;
                 }
