@@ -38,6 +38,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
+
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -57,98 +59,27 @@ import com.qualcomm.robotcore.util.Range;
 public class TeleopStart extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor frontLeft = null;
-    private DcMotor frontRight = null;
-    private DcMotor backLeft = null;
-    private DcMotor backRight = null;
-    private DcMotor lift = null;
-    private DcMotorEx intake = null;
+    ElapsedTime runtime = new ElapsedTime();
+    Onbot_HardwareITD robot = new Onbot_HardwareITD();
     
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = hardwareMap.get(DcMotor.class, "backRight");
-        lift = hardwareMap.get(DcMotor.class, "lift");
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
-        
-        // Setting the break mode of the motors
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        
-
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        frontRight.setDirection(DcMotor.Direction.FORWARD);
-        backLeft.setDirection(DcMotor.Direction.REVERSE);
-        backRight.setDirection(DcMotor.Direction.FORWARD);
-        intake.setDirection(DcMotor.Direction.FORWARD);
-        
-        // Wait for the game to start (driver presses PLAY)
+        robot.initDrive(this);
         waitForStart();
         runtime.reset();
-
+        int ticks;
+        double power;
+        double velocity;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-            // Setup a variable for each drive wheel to save power level for telemetry
-            double frontleftPower;
-            double frontrightPower;
-            double backleftPower;
-            double backrightPower;
-            
-            // Choose to drive using either Tank Mode, or POV Mode
-            // Comment out the method that's not used.  The default below is POV.
-            // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
-            double forward = -gamepad1.left_stick_y;
-            double lat = gamepad1.left_stick_x;
-            double turn  =  gamepad1.right_stick_x;
-            
-            
-            frontleftPower    = Range.clip(forward + lat + turn, -1.0, 1.0);
-            frontrightPower = Range.clip(forward - lat - turn, -1.0, 1.0);
-            backleftPower   = Range.clip(forward - lat + turn, -1, 1);
-            backrightPower = Range.clip(forward + lat - turn, -1, 1);
-            
-            
-            
-            if(gamepad1.a){
-                intake.setPower(0.5);
-            }
-            
-            if(gamepad1.y){
-                intake.setPower(-0.5);
-            }
-          
-        
-            // Tank Mode uses one st    zick to control each wheel.
-            // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            // leftPower  = -gamepad1.left_stick_y ;
-            // rightPower = -gamepad1.right_stick_y ;
-
-            // Send calculated power to wheels
-            frontLeft.setPower(frontleftPower);
-            frontRight.setPower(frontrightPower);
-            backLeft.setPower(backleftPower/2);
-            backRight.setPower(backrightPower/2);
-            
-
-            // Show the elapsed game time and wheel power.
-            
+            ticks = robot.liftSimple(gamepad1.dpad_up,gamepad1.dpad_down);
+            power = robot.lift1.getPower();
+            velocity = robot.lift1.getVelocity();
+            telemetry.addData("Current Vertical Ticks:", ticks);
+            telemetry.addData("Current Vertical Power:", power);
+            telemetry.addData("Current Vertical Velocity:", velocity);
             telemetry.update();
         }
     }

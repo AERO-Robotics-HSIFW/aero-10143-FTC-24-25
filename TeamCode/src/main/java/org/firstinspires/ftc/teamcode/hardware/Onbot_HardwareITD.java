@@ -436,6 +436,18 @@ public class Onbot_HardwareITD {
         }
     }
 
+    public int liftSimple(boolean up, boolean down){
+        if(up){
+            vertCurrent += 10;
+        } else if (down) {
+            vertCurrent -= 10;
+        }
+        lift1.setTargetPosition(vertCurrent);
+        lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift1.setPower(0.8);
+        return vertCurrent;
+    }
+
     public void lift(double slide, boolean top, boolean mid) {
 
         if (slide > 0.1 && lift1.getTargetPosition() + 50 < this.top && Math.abs(lift1.getTargetPosition() - lift1.getCurrentPosition()) < 350) {
