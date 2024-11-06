@@ -54,7 +54,7 @@ import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="TeloOpStart", group="Linear OpMode")
+@TeleOp(name="KevinTestTeleop", group="Linear OpMode")
 
 public class TeleopStart extends LinearOpMode {
 

@@ -59,37 +59,36 @@ public class Onbot_HardwareITD {
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
     // SLIDES POSITIONS
-    public static int lift1_up = 1500;
-    public static int lift1_down = 0;
-    public static int lift1Current = 0;
+    public int lift1_up = 1500;
+    public int lift1_down = 0;
+    public int lift1Current = 0;
 
-    public static int top = 8300;
-    public static int mid = 2500;
-    public static int vertCurrent = 0;
-    public static int horiMax = 5000;
-    public static int horiCurrent = 0;
+    public final int top = 8300;
+    public final int mid = 2500;
+    public int vertCurrent = 0;
+    public final int horiMax = 5000;
+    public int horiCurrent = 0;
 
     // SERVO POSITIONS
-    public static double claw_open = 0.66;
-    public static double claw_closed = 0.3;
+    public final double claw_open = 0.66;
+    public final double claw_closed = 0.3;
 
-    public static double arm1_out = 0.33;
-    public static double arm1_in = 0.496;
+    public final double arm1_out = 0.33;
+    public final double arm1_in = 0.496;
 
-    public static double arm2_out = 0.67;
-    public static double arm2_in = 0.5;
+    public final double arm2_out = 0.67;
+    public final double arm2_in = 0.5;
 
-    public static double arm1_current = arm1_in;
-    public static double arm2_current = arm2_in;
+    public double arm1_current = arm1_in;
+    public double arm2_current = arm2_in;
 
-    public static double intakeFlip1_down = 0.386;
-    public static double intakeFlip2_down = 0.65;
+    public final double intakeFlip1_down = 0.416;
 
-    public static double intakeFlip1_up = 0.5;
-    public static double intakeFlip2_up = 0.53;
+    public final double intakeFlip1_up = 0.53;
 
-    public static double kp = 0.03;
-    public static double errorMargin = 5;
+    public final double kp = 0.03;
+    public final double errorMargin = 5;
+
 
     //TOGGLES
     private String intakeMode = "forward";
@@ -151,6 +150,7 @@ public class Onbot_HardwareITD {
         lift1.setDirection(DcMotor.Direction.FORWARD);
         horizontal.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
+        intakeFlip2.setDirection(Servo.Direction.REVERSE);
 
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -169,7 +169,7 @@ public class Onbot_HardwareITD {
         arm2.setPosition(arm2_in);
         claw.setPosition(claw_open);
         intakeFlip1.setPosition(intakeFlip1_up);
-        intakeFlip2.setPosition(intakeFlip2_up);
+        intakeFlip2.setPosition(intakeFlip1_up);
 
 
     }
@@ -414,10 +414,10 @@ public class Onbot_HardwareITD {
         if (intakeUp && !intakeDownToggle) {
             if (Math.abs(intakeFlip1.getPosition() - intakeFlip1_down) < 0.05) {
                 intakeFlip1.setPosition(intakeFlip1_up);
-                intakeFlip2.setPosition(intakeFlip2_up);
+                    intakeFlip2.setPosition(intakeFlip1_up);
             } else {
                 intakeFlip1.setPosition(intakeFlip1_down);
-                intakeFlip2.setPosition(intakeFlip2_down);
+                intakeFlip2.setPosition(intakeFlip1_down);
             }
             intakeDownToggle = true;
         } else if (!intakeUp) {
@@ -429,10 +429,10 @@ public class Onbot_HardwareITD {
 
         if (pos.equals("up")) {
             intakeFlip1.setPosition(intakeFlip1_up);
-            intakeFlip2.setPosition(intakeFlip2_up);
+            intakeFlip2.setPosition(intakeFlip1_up);
         } else if (pos.equals("down")) {
             intakeFlip1.setPosition(intakeFlip1_down);
-            intakeFlip2.setPosition(intakeFlip2_down);
+            intakeFlip2.setPosition(intakeFlip1_down);
         }
     }
 

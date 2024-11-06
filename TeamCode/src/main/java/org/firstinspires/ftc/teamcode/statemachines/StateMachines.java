@@ -27,13 +27,21 @@ public class StateMachines {
     */
     Onbot_HardwareITD hardware = null;
     ElapsedTime runtime;
-    public int curLiftTargetPos;
+    public int targetVertPos;
+
+    public int arm1Target;
+    public int arm2Target;
+
+    public int intakeServo;
+
+    public int intakePower;
+
+    public int horiTarget;
 
     // Constructor initializing
-    public StateMachines(){
+    public StateMachines() {
         hardware = new Onbot_HardwareITD();
         runtime = new ElapsedTime();
-        curLiftTargetPos = 0;
     }
 
     // All possible states the robot can be in
@@ -54,7 +62,21 @@ public class StateMachines {
     robotStates robotState = robotStates.INTAKE_EXTEND;
 
     public void stateAction() {
-        // Need assistance
+        // Applying when to set the target position for encoder and servos
+        hardware.lift1.setTargetPosition(targetVertPos);
+
+        hardware.horizontal.setTargetPosition(horiTarget);
+
+        hardware.arm1.setPosition(arm1Target);
+        hardware.arm2.setPosition(arm2Target);
+
+        hardware.intakeFlip1.setPosition(intakeServo);
+        hardware.intakeFlip2.setPosition(intakeServo);
+
+        // Assigning power
+        hardware.intake.setPower(intakePower);
+        hardware.lift1.setPower(1);
+        hardware.horizontal.setPower(1);
     }
 
     // Taking the inputs from the teleop file, and translating the binds to their perspective states
@@ -65,7 +87,7 @@ public class StateMachines {
         if (gamepad2.a) {
             robotState = robotStates.INTAKE_EXTEND;
         } else if(gamepad2.b) { // B is supposed to reverse the intake, but how would that be written in a state machine?
-            // Ask about
+            robotState = robotStates.INTAKE_EXTEND;
         } else if (gamepad1.dpad_up) {
             robotState = robotStates.LIFT_EXTEND;
         } else if (gamepad1.dpad_down) {
@@ -81,15 +103,13 @@ public class StateMachines {
             case INTAKE_EXTEND:
                 hardware.intakeState(gamepad2.b,gamepad2.a);
                 hardware.horizontalSys(gamepad2.dpad_up?0.5:(gamepad2.dpad_down?-0.5:0), gamepad2.b);
-
-                if(gamepad2.a) {
-                    hardware.horizontalSys(-0.5, false);
-                    hardware.horizontalSys("up");
-                    if (hardware.horizontal.getCurrentPosition() < 150) {
-                        hardware.horizontal.setTargetPosition(0);
-                        runtime.reset();
-                        robotState = robotStates.INTAKE_RETRACT;
-                    }
+                hardware.horizontalSys(-0.5, false);
+                hardware.horizontalSys("up");
+                intakePower = 1;
+                if (hardware.horizontal.getCurrentPosition() < 150) {
+                    hardware.horizontal.setTargetPosition(0);
+                    runtime.reset();
+                    robotState = robotStates.INTAKE_RETRACT;
                 }
                 break;
 
@@ -112,33 +132,41 @@ public class StateMachines {
                 // Ralph said he'd do this one
                 runtime.reset();
                 robotState = robotStates.LIFT_EXTEND;
+                break;
 
             case LIFT_EXTEND:
                 hardware.arms("out","ur mom"/*this changes absolutely nothing - ralph (this is targeted at you kevin, in case u ever see this :)*/);
                 if(runtime.milliseconds() > 500) {
                     robotState = robotStates.ARMS_OUT;
                 }
+                break;
 
             case ARMS_OUT:
                 // Sit on it
+                robotState = robotStates.LIFT_DUMP;
+                break;
 
             case LIFT_DUMP:
                hardware.arms("in","our mom" /* Again, does nothing, dw Kevin - Ritvik */);
                if(runtime.milliseconds() > 500) {
                    robotState = robotStates.ARMS_IN;
                }
+               break;
 
            case ARMS_IN:
 
+               robotState = robotStates.LIFT_RETRACT;
+               break;
 
             case LIFT_RETRACT:
-                if (gamepad1.dpad_down) {
-                    hardware.lift(gamepad1.dpad_up?0.5:(gamepad1.dpad_down?-0.5:0),false,false);
-                    robotState = robotStates.LIFT_GRAB;
-                }
+                hardware.lift(gamepad1.dpad_up?0.5:(gamepad1.dpad_down?-0.5:0),false,false);
+                robotState = robotStates.LIFT_GRAB;
+                break;
 
             default:
                 robotState = robotStates.INTAKE_EXTEND;
+                break;
         }
     }
+
 }
