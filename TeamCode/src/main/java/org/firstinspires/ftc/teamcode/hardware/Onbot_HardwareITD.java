@@ -73,14 +73,13 @@ public class Onbot_HardwareITD {
     public final double claw_open = 0.66;
     public final double claw_closed = 0.3;
 
-    public final double arm1_out = 0.33;
-    public final double arm1_in = 0.496;
+    public final double arms_out = 0.67;
+    public final double arms_in = 0.5;
 
-    public final double arm2_out = 0.67;
-    public final double arm2_in = 0.5;
 
-    public double arm1_current = arm1_in;
-    public double arm2_current = arm2_in;
+
+    public double arm1_current = arms_in;
+    public double arm2_current = arms_in;
 
     public final double intakeFlip1_down = 0.416;
 
@@ -150,6 +149,8 @@ public class Onbot_HardwareITD {
         lift1.setDirection(DcMotor.Direction.FORWARD);
         horizontal.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
+
+        arm1.setDirection(Servo.Direction.REVERSE);
         intakeFlip2.setDirection(Servo.Direction.REVERSE);
 
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -165,8 +166,8 @@ public class Onbot_HardwareITD {
         backRight.setPower(0);
 
         // SERVO INITIALIZE *********************************************************************************************************
-        arm1.setPosition(arm1_in);
-        arm2.setPosition(arm2_in);
+        arm1.setPosition(arms_in);
+        arm2.setPosition(arms_in);
         claw.setPosition(claw_open);
         intakeFlip1.setPosition(intakeFlip1_up);
         intakeFlip2.setPosition(intakeFlip1_up);
@@ -491,16 +492,16 @@ public class Onbot_HardwareITD {
     public void arms(boolean armPos, boolean clawButton) {
         //METHOD FOR MANUAL (toggles)
         if (armPos && !armToggle) {
-            if (arm1.getPosition() == arm1_out) {
-                arm1.setPosition(arm1_in);
-                arm2.setPosition(arm2_in);
-                arm1_current = arm1_in;
-                arm2_current = arm2_in;
+            if (arm1.getPosition() == arms_out) {
+                arm1.setPosition(arms_in);
+                arm2.setPosition(arms_in);
+                arm1_current = arms_in;
+                arm2_current = arms_in;
             } else {
-                arm1.setPosition(arm1_out);
-                arm2.setPosition(arm2_out);
-                arm1_current = arm1_out;
-                arm2_current = arm2_out;
+                arm1.setPosition(arms_out);
+                arm2.setPosition(arms_out);
+                arm1_current = arms_out;
+                arm2_current = arms_out;
             }
             armToggle = true;
         } else if (!armPos) {
@@ -521,15 +522,15 @@ public class Onbot_HardwareITD {
     public void arms(String armPos, String clawPos) {
         //METHOD FOR SET VALUES
         if (armPos.equals("in")) {
-            arm1.setPosition(arm1_in);
-            arm2.setPosition(arm2_in);
-            arm1_current = arm1_in;
-            arm2_current = arm2_in;
+            arm1.setPosition(arms_in);
+            arm2.setPosition(arms_in);
+            arm1_current = arms_in;
+            arm2_current = arms_in;
         } else if (armPos.equals("out")) {
-            arm1.setPosition(arm1_out);
-            arm2.setPosition(arm2_out);
-            arm1_current = arm1_out;
-            arm2_current = arm2_out;
+            arm1.setPosition(arms_out);
+            arm2.setPosition(arms_out);
+            arm1_current = arms_out;
+            arm2_current = arms_out;
         }
         if (clawPos.equals("open")) {
             claw.setPosition(claw_open);

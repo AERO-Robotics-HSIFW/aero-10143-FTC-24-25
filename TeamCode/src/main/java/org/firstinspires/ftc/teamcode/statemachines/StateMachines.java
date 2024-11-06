@@ -1,50 +1,11 @@
 package org.firstinspires.ftc.teamcode.statemachines;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.*;
-import static java.lang.Math.sin;
 
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.State;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
 
 public class StateMachines {
-    /* Note to self: The term "reversing" means it is going into the robot
-    the term "forward" means that it is going out of the robot
-    (That is for intake when looking in the hardware class)
-    */
-    Onbot_HardwareITD hardware = null;
-    ElapsedTime runtime;
-    public int targetVertPos;
-
-    public int arm1Target;
-    public int arm2Target;
-
-    public int intakeServo;
-
-    public int intakePower;
-
-    public int horiTarget;
-
-    // Constructor initializing
-    public StateMachines() {
-        hardware = new Onbot_HardwareITD();
-        runtime = new ElapsedTime();
-    }
-
-    // All possible states the robot can be in
     public enum robotStates {
         IDLE,
         LIFT_START,
@@ -52,23 +13,57 @@ public class StateMachines {
         LIFT_GRAB,
         LIFT_DUMP,
         LIFT_RETRACT,
+        INTAKE_START,
         INTAKE_EXTEND,
+        INTAKE_GRAB,
         INTAKE_RETRACT,
         INTAKE_TRANSFER,
         ARMS_OUT,
         ARMS_IN,
         MANUAL
     }
+
+    /* Note to self: The term "reversing" means it is going into the robot
+    the term "forward" means that it is going out of the robot
+    (That is for intake when looking in the hardware class)
+    */
+    Onbot_HardwareITD hardware = null;
     robotStates robotState = robotStates.INTAKE_EXTEND;
+    ElapsedTime runtime;
+    public int vertTarget;
+
+    public double armsTarget;
+
+    public int intakeServo;
+
+    public int intakePower;
+
+    public int horiTarget;
+    private Gamepad gamepad1;
+    private Gamepad gamepad2;
+
+    // Constructor initializing
+    public StateMachines() {
+        hardware = new Onbot_HardwareITD();
+        runtime = new ElapsedTime();
+        armsTarget = hardware.arms_in;
+        horiTarget = 0;
+        vertTarget =0;
+
+
+    }
+
+    // All possible states the robot can be in
+
 
     public void stateAction() {
         // Applying when to set the target position for encoder and servos
-        hardware.lift1.setTargetPosition(targetVertPos);
+        hardware.lift1.setTargetPosition(vertTarget);
         //this is correct
         hardware.horizontal.setTargetPosition(horiTarget);
 
-        hardware.arm1.setPosition(arm1Target);
-        hardware.arm2.setPosition(arm2Target);
+        hardware.arm1.setPosition(armsTarget);
+        hardware.arm2.setPosition(armsTarget);
 
         hardware.intakeFlip1.setPosition(intakeServo);
         hardware.intakeFlip2.setPosition(intakeServo);
@@ -103,7 +98,13 @@ public class StateMachines {
     // The actual state machine logic
     public void stateMachineLogic() {
         switch (robotState) {
+            case INTAKE_START:
+
+                break;
             case INTAKE_EXTEND:
+
+                break;
+            case INTAKE_GRAB:
                 //intake should just be on unless you user tells it to stop or reverse
                 hardware.intakeState(gamepad2.b,gamepad2.a);
                 //why are there three different horizontalSys methods huh
@@ -119,7 +120,7 @@ public class StateMachines {
                     robotState = robotStates.INTAKE_RETRACT;
                 }
                 break;
-                //I think this implementation is wrong. You should not be doing manual control here.
+                 //I think this implementation is wrong. You should not be doing manual control here.
                 /* here is something better:
                 //if robot picks up something colored then start retracting
                 if(colorSensor.blue() > some number){
@@ -129,8 +130,6 @@ public class StateMachines {
                     robotState = robotStates.INTAKE_RETRACT;
                 }
                  */
-
-
             case INTAKE_RETRACT:
                 //in your retract state you need something to tell the intake pivot servos to lift immediately
                 hardware.intakeState("forward",true);
