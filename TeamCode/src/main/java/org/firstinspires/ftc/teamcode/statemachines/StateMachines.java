@@ -64,7 +64,7 @@ public class StateMachines {
     public void stateAction() {
         // Applying when to set the target position for encoder and servos
         hardware.lift1.setTargetPosition(targetVertPos);
-
+        //this is correct
         hardware.horizontal.setTargetPosition(horiTarget);
 
         hardware.arm1.setPosition(arm1Target);
@@ -85,8 +85,11 @@ public class StateMachines {
         gamepad2 = input2;
 
         if (gamepad2.a) {
+            //you guys have to decide a control scheme, like will the drivers relay on the states to do all horizontal extension or will it be manual
+            // you cant mix the two
             robotState = robotStates.INTAKE_EXTEND;
         } else if(gamepad2.b) { // B is supposed to reverse the intake, but how would that be written in a state machine?
+            // just set the intake power to be something
             robotState = robotStates.INTAKE_EXTEND;
         } else if (gamepad1.dpad_up) {
             robotState = robotStates.LIFT_EXTEND;
@@ -101,19 +104,35 @@ public class StateMachines {
     public void stateMachineLogic() {
         switch (robotState) {
             case INTAKE_EXTEND:
+                //intake should just be on unless you user tells it to stop or reverse
                 hardware.intakeState(gamepad2.b,gamepad2.a);
+                //why are there three different horizontalSys methods huh
                 hardware.horizontalSys(gamepad2.dpad_up?0.5:(gamepad2.dpad_down?-0.5:0), gamepad2.b);
                 hardware.horizontalSys(-0.5, false);
                 hardware.horizontalSys("up");
+                //intake power should be default on and then change if the user inputs.
                 intakePower = 1;
+
                 if (hardware.horizontal.getCurrentPosition() < 150) {
                     hardware.horizontal.setTargetPosition(0);
                     runtime.reset();
                     robotState = robotStates.INTAKE_RETRACT;
                 }
                 break;
+                //I think this implementation is wrong. You should not be doing manual control here.
+                /* here is something better:
+                //if robot picks up something colored then start retracting
+                if(colorSensor.blue() > some number){
+                    hardware.horizontal.setTargetPosition(0);
+                    intake needs to be pivoted up to avoid crashing into barrier
+                    runtime.reset();
+                    robotState = robotStates.INTAKE_RETRACT;
+                }
+                 */
+
 
             case INTAKE_RETRACT:
+                //in your retract state you need something to tell the intake pivot servos to lift immediately
                 hardware.intakeState("forward",true);
                 if(runtime.milliseconds() > 1500){
                     robotState = robotStates.INTAKE_TRANSFER;
@@ -159,11 +178,13 @@ public class StateMachines {
                break;
 
             case LIFT_RETRACT:
+                //this should not be manaual
                 hardware.lift(gamepad1.dpad_up?0.5:(gamepad1.dpad_down?-0.5:0),false,false);
                 robotState = robotStates.LIFT_GRAB;
                 break;
 
             default:
+                //default state needs to be initialization position
                 robotState = robotStates.INTAKE_EXTEND;
                 break;
         }
