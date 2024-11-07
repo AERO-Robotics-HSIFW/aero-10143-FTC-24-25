@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -58,7 +59,7 @@ public class Onbot_HardwareITD {
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
-    // SLIDES POSITIONS
+    // MOTOR VARIABLES
     public int lift1_up = 1500;
     public int lift1_down = 0;
     public int lift1Current = 0;
@@ -69,6 +70,8 @@ public class Onbot_HardwareITD {
     public final int horiMax = 5000;
     public int horiCurrent = 0;
 
+    public double intakePower =0;
+
     // SERVO POSITIONS
     public final double claw_open = 0.66;
     public final double claw_closed = 0.3;
@@ -78,18 +81,25 @@ public class Onbot_HardwareITD {
 
 
 
+
     public double arm1_current = arms_in;
     public double arm2_current = arms_in;
 
     public final double intakeFlip1_down = 0.416;
 
-    public final double intakeFlip1_up = 0.53;
+    public final double intakeFlip1_up = 0.50;
+
+    public final double intakeFlip2_offset = 0.03;
+    public double intakeFlip1_current = intakeFlip1_up;
+
 
     public final double kp = 0.03;
     public final double errorMargin = 5;
 
 
     //TOGGLES
+    private boolean intToggle = false;
+    private boolean doubleToggle = false;
     private String intakeMode = "forward";
     private boolean intakeModeToggle = false;
     private boolean intakeToggle = false;
@@ -99,8 +109,7 @@ public class Onbot_HardwareITD {
     private boolean liftToggle = false;
     private boolean intakeDownToggle = false;
 
-    public void HardwareTestbot() {
-    }
+
 
     /* Initialize standard Hardware interfaces */
     public void initDrive(LinearOpMode opMode) {
@@ -198,127 +207,6 @@ public class Onbot_HardwareITD {
 
     }
 
-    public void fieldCentric(double y, double x, double rx) {
-
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        // Rotate the movement direction counter to the bot's rotation
-        double rotX = x * Math.cos(botHeading) - y * sin(botHeading);
-        double rotY = x * sin(botHeading) + y * Math.cos(botHeading);
-
-        rotX = rotX * STRAFE_GAIN;  // Counteract imperfect strafing
-
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (-rotY + rotX - rx) / denominator;
-        double backLeftPower = (rotY - rotX - rx) / denominator;
-        double frontRightPower = (-rotY - rotX + rx) / denominator;
-        double backRightPower = (rotY + rotX + rx) / denominator;
-
-        // Set drive motor power levels.
-        frontLeft.setPower(frontLeftPower * MAX_POWER);
-        frontRight.setPower(frontRightPower * MAX_POWER);
-        backLeft.setPower(backLeftPower * MAX_POWER);
-        backRight.setPower(backRightPower * MAX_POWER);
-    }
-
-    public void distanceDrive(double forMovement, double latMovement, double turn, double speed) {
-        int y = (int) (forMovement * COUNTS_PER_INCH);
-        int x = (int) (latMovement * COUNTS_PER_INCH);
-        turn = ROBOT_DIAMETER_INCHES * Math.PI * (turn / 180.0) * Math.PI / 6.5;
-        int rx = (int) (turn * COUNTS_PER_INCH);
-
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        // Rotate the movement direction counter to the bot's rotation
-        double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
-        double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
-
-
-        rotX = rotX * STRAFE_GAIN;  // Counteract imperfect strafing
-
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-
-        int frontleftTargetPos = (int) (rotY - rotX - rx);
-        int backleftTargetPos = (int) (-rotY + rotX - rx);
-        int frontrightTargetPos = (int) (rotY + rotX + rx);
-        int backrightTargetPos = (int) (-rotY - rotX + rx);
-
-        frontLeft.setTargetPosition(frontleftTargetPos);
-        frontRight.setTargetPosition(frontrightTargetPos);
-        backLeft.setTargetPosition(backleftTargetPos);
-        backRight.setTargetPosition(backrightTargetPos);
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        frontLeft.setPower(Math.abs(speed));
-        frontRight.setPower(Math.abs(speed));
-        backLeft.setPower(Math.abs(speed));
-        backRight.setPower(Math.abs(speed));
-
-    }
-
-    public void mechEN(double forMovement, double latMovement, double turn, double speed) {
-        int forwardSteps = (int) (forMovement * COUNTS_PER_INCH);
-        int sideSteps = (int) (latMovement * COUNTS_PER_INCH);
-        turn = ROBOT_DIAMETER_INCHES * Math.PI * (turn / 180.0) * Math.PI / 6.5;
-        int turnSteps = (int) (turn * COUNTS_PER_INCH);
-
-
-        int frontleftTargetPos = frontLeft.getCurrentPosition() + (int) (forwardSteps - sideSteps - turnSteps);
-        int frontrightTargetPos = frontRight.getCurrentPosition() + (int) (forwardSteps + sideSteps + turnSteps);
-        int backleftTargetPos = backLeft.getCurrentPosition() + (int) (-forwardSteps + sideSteps - turnSteps);
-        int backrightTargetPos = backRight.getCurrentPosition() + (int) (-forwardSteps - sideSteps + turnSteps);
-
-        frontLeft.setTargetPosition(frontleftTargetPos);
-        frontRight.setTargetPosition(frontrightTargetPos);
-        backLeft.setTargetPosition(backleftTargetPos);
-        backRight.setTargetPosition(backrightTargetPos);
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        frontLeft.setPower(Math.abs(speed));
-        frontRight.setPower(Math.abs(speed));
-        backLeft.setPower(Math.abs(speed));
-        backRight.setPower(Math.abs(speed));
-
-        while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy()) {
-        }
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
-    }
-
-    public void turnToAngle(double angle) {
-        //skibidi toilet - andrew
-        encoderState("off");
-        botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        double error = botHeading - angle;
-        while (Math.abs(error) > errorMargin && myOpMode.opModeIsActive()) {
-            fieldCentric(0, 0, error * kp);
-            error = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) - angle;
-        }
-        encoderState("reset");
-        encoderState("run");
-    }
-
     public void encoderState(String a) {
         if (a.equals("reset")) {
             frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -344,8 +232,51 @@ public class Onbot_HardwareITD {
         }
     }
 
-    public void intakeState(boolean a, boolean b) {
-        if (a && !intakeModeToggle) {
+    public int toggleIntegers(boolean input, int value1, int value2, int current){
+        int returnValue = current;
+        if (input && !intToggle) {
+            if (value1 == current) {
+                returnValue = value2;
+            } else {
+                returnValue =value1;
+            }
+            intToggle = true;
+        } else if (!input) {
+            intToggle = false;
+        }
+        return returnValue;
+    }
+    public double toggleDoubles(boolean input, double value1, double value2, double current){
+        double returnValue = current;
+        if (input && !doubleToggle) {
+            if (value1 == current) {
+                returnValue = value2;
+            } else {
+                returnValue = value1;
+            }
+            doubleToggle = true;
+        } else if (!input) {
+            doubleToggle = false;
+        }
+        return returnValue;
+    }
+
+    public void actions(){
+        intake.setPower(intakePower);
+
+        horizontal.setTargetPosition(horiCurrent);
+        lift1.setTargetPosition(vertCurrent);
+
+        arm1.setPosition(arm1_current);
+        arm2.setPosition(arm1_current);
+
+        intakeFlip1.setPosition(intakeFlip1_current);
+        intakeFlip1.setPosition(intakeFlip1_current + intakeFlip2_offset);
+    }
+    //Manual use of intake
+    public void intakeState(boolean direction, boolean on) {
+
+        if (direction && !intakeModeToggle) {
             if (intakeMode.equals("forward")) {
                 intakeMode = "reverse";
             } else {

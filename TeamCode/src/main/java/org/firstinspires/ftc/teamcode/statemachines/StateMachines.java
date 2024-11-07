@@ -34,7 +34,7 @@ public class StateMachines {
 
     public double armsTarget;
 
-    public int intakeServo;
+    public double intakeFlipTarget;
 
     public int intakePower;
 
@@ -49,8 +49,7 @@ public class StateMachines {
         armsTarget = hardware.arms_in;
         horiTarget = 0;
         vertTarget =0;
-
-
+        intakeFlipTarget = hardware.intakeFlip1_up;
     }
 
     // All possible states the robot can be in
@@ -65,8 +64,8 @@ public class StateMachines {
         hardware.arm1.setPosition(armsTarget);
         hardware.arm2.setPosition(armsTarget);
 
-        hardware.intakeFlip1.setPosition(intakeServo);
-        hardware.intakeFlip2.setPosition(intakeServo);
+        hardware.intakeFlip1.setPosition(intakeFlipTarget);
+        hardware.intakeFlip2.setPosition(intakeFlipTarget + hardware.intakeFlip2_offset);
 
         // Assigning power
         hardware.intake.setPower(intakePower);
