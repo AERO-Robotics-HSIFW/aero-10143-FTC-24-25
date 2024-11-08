@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.statemachines;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -39,6 +40,7 @@ public class StateMachines {
     public int intakePower;
 
     public int horiTarget;
+    private robotStates prevState = robotState;
     private Gamepad gamepad1;
     private Gamepad gamepad2;
 
@@ -69,6 +71,9 @@ public class StateMachines {
 
         // Assigning power
         hardware.intake.setPower(intakePower);
+
+        hardware.lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hardware.horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.lift1.setPower(1);
         hardware.horizontal.setPower(1);
     }
@@ -77,6 +82,7 @@ public class StateMachines {
     public void inputTranslation(Gamepad input1, Gamepad input2) {
         gamepad1 = input1;
         gamepad2 = input2;
+        boolean manual = (gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.right_bumper);
 
         if (gamepad2.left_bumper) {
             robotState = robotStates.INTAKE_EXTEND;
@@ -90,31 +96,24 @@ public class StateMachines {
         } else {
             robotState = robotStates.IDLE;
         }
+
+        if(manual){
+            prevState = (robotState == robotStates.MANUAL?prevState:robotState); //if it runs again prevState will never be set to manual
+            robotState =  robotState.MANUAL;
+        }
+
     }
 
     // The actual state machine logic
     public void stateMachineLogic() {
         switch (robotState) {
-            case INTAKE_START: // see input translation
+            case INTAKE_START: // see input translation -> gp2 left bump signifies starting state machine
                 break;
             case INTAKE_EXTEND:
-
+                hardware.intakePosSet(horiTarget < hardware.horiInSub);
                 break;
             case INTAKE_GRAB:
-                //intake should just be on unless you user tells it to stop or reverse
-                //hardware.intakeState(gamepad2.b,gamepad2.a); ************
-                //why are there three different horizontalSys methods huh
-                hardware.horizontalSys(gamepad2.dpad_up?0.5:(gamepad2.dpad_down?-0.5:0), gamepad2.b);
-                hardware.horizontalSys(-0.5, false);
-                hardware.horizontalSys("up");
-                //intake power should be default on and then change if the user inputs.
-                intakePower = 1;
 
-                if (hardware.horizontal.getCurrentPosition() < 150) {
-                    hardware.horizontal.setTargetPosition(0);
-                    runtime.reset();
-                    robotState = robotStates.INTAKE_RETRACT;
-                }
                 break;
                  //I think this implementation is wrong. You should not be doing manual control here.
                 /* here is something better:
@@ -174,14 +173,15 @@ public class StateMachines {
 
             case LIFT_RETRACT:
                 //this should not be manaual
-                hardware.liftMan(gamepad1.dpad_up?0.5:(gamepad1.dpad_down?-0.5:0),false,false);
-                robotState = robotStates.LIFT_GRAB;
+                horiTarget = 0;
                 break;
-
+            case MANUAL:
+                break;
             default:
                 //default state needs to be initialization position
-                robotState = robotStates.INTAKE_EXTEND;
+                robotState = robotStates.INTAKE_START;
                 break;
+
         }
     }
 

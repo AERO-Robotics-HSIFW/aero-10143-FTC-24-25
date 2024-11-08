@@ -86,13 +86,7 @@ public class Onbot_HardwareITD {
     private boolean doubleToggle = false;
     private boolean stringToggle = false;
     private String intakeMode = "forward";
-    private boolean intakeModeToggle = false;
-    private boolean intakeToggle = false;
-    private boolean intakeOn = false;
-    private boolean armToggle = false;
-    private boolean clawToggle = false;
-    private boolean liftToggle = false;
-    private boolean intakeDownToggle = false;
+
 
 
 
@@ -305,7 +299,7 @@ public class Onbot_HardwareITD {
             intakeFlip_current = intakeFlip_down;
         }
     }
-    public void horiSlidesMan(double slide) {
+    public int horiSlidesMan(double slide) {
         if (slide > 0.1 && horizontal.getTargetPosition() + 15 < horiMax && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
             horiCurrent += (int)(15 * slide);
         } else if (slide < -0.1 && horizontal.getTargetPosition() - 15 > 0 && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
@@ -314,10 +308,12 @@ public class Onbot_HardwareITD {
         else if((slide<0.1 && slide>-0.1) &&lift1.getCurrentPosition()>0 && lift1.getCurrentPosition()<105) {
             horiCurrent = 0;
         }
+        return horiCurrent;
     }
 
-    public void horiSlidesSet(int pos) {
+    public int horiSlidesSet(int pos) {
         horiCurrent = pos;
+        return horiCurrent;
     }
 
     public int liftSimple(boolean up, boolean down){
@@ -332,7 +328,7 @@ public class Onbot_HardwareITD {
         return vertCurrent;
     }
 
-    public void liftMan(double slide, boolean top, boolean reset) {
+    public int liftMan(double slide, boolean top, boolean reset) {
 
         if (slide > 0.1 && lift1.getTargetPosition() + 50 < this.top && Math.abs(lift1.getTargetPosition() - lift1.getCurrentPosition()) < 350) {
             vertCurrent += 50;
@@ -346,6 +342,11 @@ public class Onbot_HardwareITD {
         if (reset) {
             vertCurrent = 0;
         }
+        return vertCurrent;
+    }
+    public int vertSlidesSet(int pos) {
+        vertCurrent = pos;
+        return vertCurrent;
     }
 
     //MANUAL
