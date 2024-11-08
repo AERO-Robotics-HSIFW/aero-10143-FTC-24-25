@@ -56,13 +56,7 @@ public class TeleOpITD extends LinearOpMode {
         int num = 0;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            robot.roboCentric(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-            robot.arms(gamepad1.left_bumper, gamepad1.right_bumper);
-            robot.lift(gamepad1.dpad_up?0.5:(gamepad1.dpad_down?-0.5:0),false,false/*gamepad1.b,gamepad1.a*/);
-            
-            robot.horizontalSys(0,gamepad1.a);
-            robot.intakeState(gamepad1.b,gamepad1.a);
-            //robot.intakeState(gamepad2.b,gamepad2.a);
+
             
             
             

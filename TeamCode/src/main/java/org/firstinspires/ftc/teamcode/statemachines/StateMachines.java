@@ -49,7 +49,7 @@ public class StateMachines {
         armsTarget = hardware.arms_in;
         horiTarget = 0;
         vertTarget =0;
-        intakeFlipTarget = hardware.intakeFlip1_up;
+        intakeFlipTarget = hardware.intakeFlip_up;
     }
 
     // All possible states the robot can be in
@@ -105,7 +105,7 @@ public class StateMachines {
                 break;
             case INTAKE_GRAB:
                 //intake should just be on unless you user tells it to stop or reverse
-                hardware.intakeState(gamepad2.b,gamepad2.a);
+                //hardware.intakeState(gamepad2.b,gamepad2.a); ************
                 //why are there three different horizontalSys methods huh
                 hardware.horizontalSys(gamepad2.dpad_up?0.5:(gamepad2.dpad_down?-0.5:0), gamepad2.b);
                 hardware.horizontalSys(-0.5, false);
@@ -131,7 +131,7 @@ public class StateMachines {
                  */
             case INTAKE_RETRACT:
                 //in your retract state you need something to tell the intake pivot servos to lift immediately
-                hardware.intakeState("forward",true);
+                //hardware.intakeState("forward",true); *********
                 if(runtime.milliseconds() > 1500){
                     robotState = robotStates.INTAKE_TRANSFER;
                     runtime.reset();
@@ -177,7 +177,7 @@ public class StateMachines {
 
             case LIFT_RETRACT:
                 //this should not be manaual
-                hardware.lift(gamepad1.dpad_up?0.5:(gamepad1.dpad_down?-0.5:0),false,false);
+                hardware.liftMan(gamepad1.dpad_up?0.5:(gamepad1.dpad_down?-0.5:0),false,false);
                 robotState = robotStates.LIFT_GRAB;
                 break;
 

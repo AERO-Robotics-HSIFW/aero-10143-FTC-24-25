@@ -1,20 +1,12 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import static java.lang.Math.sin;
-
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
@@ -62,44 +54,39 @@ public class Onbot_HardwareITD {
     // MOTOR VARIABLES
     public int lift1_up = 1500;
     public int lift1_down = 0;
-    public int lift1Current = 0;
+
 
     public final int top = 8300;
     public final int mid = 2500;
-    public int vertCurrent = 0;
+
     public final int horiMax = 5000;
-    public int horiCurrent = 0;
+    public int horiMin = 0;
 
     public double intakePower =0;
 
     // SERVO POSITIONS
     public final double claw_open = 0.66;
     public final double claw_closed = 0.3;
-
     public final double arms_out = 0.67;
     public final double arms_in = 0.5;
-
-
-
-
-    public double arm1_current = arms_in;
-    public double arm2_current = arms_in;
-
-    public final double intakeFlip1_down = 0.416;
-
-    public final double intakeFlip1_up = 0.50;
-
+    public final double intakeFlip_down = 0.416;
+    public final double intakeFlip_up = 0.50;
     public final double intakeFlip2_offset = 0.03;
-    public double intakeFlip1_current = intakeFlip1_up;
 
+    // CURRENT POSITIONS
+    public int vertCurrent = 0;
+    public int horiCurrent = 0;
+    public double intakeFlip_current = intakeFlip_up;
+    public double arms_current = arms_in;
+    public double claw_current = claw_open;
 
     public final double kp = 0.03;
     public final double errorMargin = 5;
 
-
     //TOGGLES
     private boolean intToggle = false;
     private boolean doubleToggle = false;
+    private boolean stringToggle = false;
     private String intakeMode = "forward";
     private boolean intakeModeToggle = false;
     private boolean intakeToggle = false;
@@ -164,9 +151,11 @@ public class Onbot_HardwareITD {
 
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         lift1.setTargetPosition(0);
         horizontal.setTargetPosition(0);
-
+        lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // MOTOR POWERS
         frontLeft.setPower(0);
@@ -178,8 +167,9 @@ public class Onbot_HardwareITD {
         arm1.setPosition(arms_in);
         arm2.setPosition(arms_in);
         claw.setPosition(claw_open);
-        intakeFlip1.setPosition(intakeFlip1_up);
-        intakeFlip2.setPosition(intakeFlip1_up);
+        intakeFlip1.setPosition(intakeFlip_up);
+        intakeFlip2.setPosition(intakeFlip_up + intakeFlip2_offset);
+
 
 
     }
@@ -235,7 +225,7 @@ public class Onbot_HardwareITD {
     public int toggleIntegers(boolean input, int value1, int value2, int current){
         int returnValue = current;
         if (input && !intToggle) {
-            if (value1 == current) {
+            if (current >= value1) {
                 returnValue = value2;
             } else {
                 returnValue =value1;
@@ -261,111 +251,75 @@ public class Onbot_HardwareITD {
         return returnValue;
     }
 
+    public String toggleStrings(boolean input, String value1, String value2, String current){
+        String returnValue = current;
+        if (input && !doubleToggle) {
+            if (value1.equals(current)) {
+                returnValue = value2;
+            } else {
+                returnValue = value1;
+            }
+            stringToggle = true;
+        } else if (!input) {
+            stringToggle = false;
+        }
+        return returnValue;
+    }
+
     public void actions(){
         intake.setPower(intakePower);
 
         horizontal.setTargetPosition(horiCurrent);
         lift1.setTargetPosition(vertCurrent);
 
-        arm1.setPosition(arm1_current);
-        arm2.setPosition(arm1_current);
+        arm1.setPosition(arms_current);
+        arm2.setPosition(arms_current);
 
-        intakeFlip1.setPosition(intakeFlip1_current);
-        intakeFlip1.setPosition(intakeFlip1_current + intakeFlip2_offset);
+        intakeFlip1.setPosition(intakeFlip_current);
+        intakeFlip1.setPosition(intakeFlip_current + intakeFlip2_offset);
+
+        horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        horizontal.setPower(1);
+        lift1.setPower(1);
     }
     //Manual use of intake
-    public void intakeState(boolean direction, boolean on) {
+    public void intakePowerManual(boolean direction, boolean on) {
+        intakeMode = toggleStrings(direction, "forward","reverse",intakeMode);
+        intakePower = toggleDoubles(on, intakeMode.equals("forward")?1:-1,0,intakePower);
+        intakePosSet(intakePower==0);
 
-        if (direction && !intakeModeToggle) {
-            if (intakeMode.equals("forward")) {
-                intakeMode = "reverse";
-            } else {
-                intakeMode = "forward";
-            }
-            intakeModeToggle = true;
-        } else if (!a) {
-            intakeModeToggle = false;
+    }
+    //Set directions for intake
+    public void intakePowerSet(boolean on, boolean inRobot) {
+        if(on){
+            intakePower = inRobot?1:-1; //inRobot signifies whether intake will be bringing samples into the robot
         }
-
-        if (b && !intakeToggle) {
-            if (intakeOn) {
-                intakeOn = false;
-            } else {
-                intakeOn = true;
-            }
-            intakeToggle = true;
-        } else if (!b) {
-            intakeToggle = false;
-        }
-
-        if (intakeOn) {
-            if (intakeMode.equals("forward")) {
-                intake.setPower(1);
-            } else {
-                intake.setPower(-1);
-            }
-        } else {
-            intake.setPower(0);
+        else{
+            intakePower = 0;
         }
     }
-
-    public void intakeState(String a, boolean b) {
-        if (b) {
-            if (a.equals("forward")) {
-                intakeMode = "forward";
-                intake.setPower(1);
-            } else {
-                intakeMode = "reverse";
-                intake.setPower(-1);
-            }
-        } else {
-            intake.setPower(0);
+    public void intakePosSet(boolean up){
+        if(up){
+            intakeFlip_current = intakeFlip_up;
+        }
+        else{
+            intakeFlip_current = intakeFlip_down;
         }
     }
-
-    public void horizontalSys(double slide, boolean intakeUp) {
+    public void horiSlidesMan(double slide) {
         if (slide > 0.1 && horizontal.getTargetPosition() + 15 < horiMax && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
-            horiCurrent += 15;
-            horizontal.setTargetPosition(horiCurrent);
-            horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            horizontal.setPower(1);
+            horiCurrent += (int)(15 * slide);
         } else if (slide < -0.1 && horizontal.getTargetPosition() - 15 > 0 && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
-            horiCurrent -= 15;
-            horizontal.setTargetPosition(horiCurrent);
-            horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            horizontal.setPower(1);
+            horiCurrent -= (int)(15 * slide);
         }
-        /*
-        else if((slide<0.1 && slide>-0.1) &&lift1.getTargetPosition()>0 && lift1.getTargetPosition()<105){
-            horiCurrent -= 75;
-            horizontal.setTargetPosition(horiCurrent);
-            horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            horizontal.setPower(1);
-        }
-        */
-        if (intakeUp && !intakeDownToggle) {
-            if (Math.abs(intakeFlip1.getPosition() - intakeFlip1_down) < 0.05) {
-                intakeFlip1.setPosition(intakeFlip1_up);
-                    intakeFlip2.setPosition(intakeFlip1_up);
-            } else {
-                intakeFlip1.setPosition(intakeFlip1_down);
-                intakeFlip2.setPosition(intakeFlip1_down);
-            }
-            intakeDownToggle = true;
-        } else if (!intakeUp) {
-            intakeDownToggle = false;
+        else if((slide<0.1 && slide>-0.1) &&lift1.getCurrentPosition()>0 && lift1.getCurrentPosition()<105) {
+            horiCurrent = 0;
         }
     }
 
-    public void horizontalSys(String pos) {
-
-        if (pos.equals("up")) {
-            intakeFlip1.setPosition(intakeFlip1_up);
-            intakeFlip2.setPosition(intakeFlip1_up);
-        } else if (pos.equals("down")) {
-            intakeFlip1.setPosition(intakeFlip1_down);
-            intakeFlip2.setPosition(intakeFlip1_down);
-        }
+    public void horiSlidesSet(int pos) {
+        horiCurrent = pos;
     }
 
     public int liftSimple(boolean up, boolean down){
@@ -380,93 +334,39 @@ public class Onbot_HardwareITD {
         return vertCurrent;
     }
 
-    public void lift(double slide, boolean top, boolean mid) {
+    public void liftMan(double slide, boolean top, boolean reset) {
 
         if (slide > 0.1 && lift1.getTargetPosition() + 50 < this.top && Math.abs(lift1.getTargetPosition() - lift1.getCurrentPosition()) < 350) {
             vertCurrent += 50;
-            lift1.setTargetPosition(vertCurrent);
-            lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift1.setPower(1);
         } else if (slide < -0.1 && lift1.getTargetPosition() - 25 > 0 && Math.abs(lift1.getTargetPosition() - lift1.getCurrentPosition()) < 350) {
             vertCurrent -= 50;
-            lift1.setTargetPosition(vertCurrent);
-            lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift1.setPower(1);
         } else if ((slide < 0.1 && slide > -0.1) && lift1.getTargetPosition() > 0 && lift1.getTargetPosition() < 105) {
-            vertCurrent -= 50;
-            lift1.setTargetPosition(vertCurrent);
-            lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift1.setPower(1);
+            vertCurrent = 0;
         }
+        vertCurrent = toggleIntegers(top, this.mid - 100, this.top, vertCurrent);
 
-        if (top && !liftToggle) {
-            if (lift1.getCurrentPosition() > this.mid - 100) {
-                lift1.setTargetPosition(this.top);
-                lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                lift1.setPower(1);
-            } else {
-                lift1.setTargetPosition(this.mid);
-                lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                lift1.setPower(1);
-            }
-            liftToggle = true;
-        } else if (!top) {
-            liftToggle = false;
-        }
-        if (mid) {
-            lift1.setTargetPosition(0);
-            lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            lift1.setPower(1);
+        if (reset) {
+            vertCurrent = 0;
         }
     }
 
-    public void arms(boolean armPos, boolean clawButton) {
-        //METHOD FOR MANUAL (toggles)
-        if (armPos && !armToggle) {
-            if (arm1.getPosition() == arms_out) {
-                arm1.setPosition(arms_in);
-                arm2.setPosition(arms_in);
-                arm1_current = arms_in;
-                arm2_current = arms_in;
-            } else {
-                arm1.setPosition(arms_out);
-                arm2.setPosition(arms_out);
-                arm1_current = arms_out;
-                arm2_current = arms_out;
-            }
-            armToggle = true;
-        } else if (!armPos) {
-            armToggle = false;
-        }
-        if (clawButton && !clawToggle) {
-            if (claw.getPosition() == claw_closed) {
-                claw.setPosition(claw_open);
-            } else {
-                claw.setPosition(claw_closed);
-            }
-            clawToggle = true;
-        } else if (!clawButton) {
-            clawToggle = false;
-        }
+    //MANUAL
+    public void armsMan(boolean armPos, boolean clawButton) {
+        arms_current = toggleDoubles(armPos, arms_in, arms_out, arms_current);
+        claw_current = toggleDoubles(clawButton, claw_open, claw_closed, claw_current);
     }
-
-    public void arms(String armPos, String clawPos) {
+    //SET POSITIONS
+    public void armsSet(String armPos, String clawPos) {
         //METHOD FOR SET VALUES
         if (armPos.equals("in")) {
-            arm1.setPosition(arms_in);
-            arm2.setPosition(arms_in);
-            arm1_current = arms_in;
-            arm2_current = arms_in;
+            arms_current = arms_in;
         } else if (armPos.equals("out")) {
-            arm1.setPosition(arms_out);
-            arm2.setPosition(arms_out);
-            arm1_current = arms_out;
-            arm2_current = arms_out;
+            arms_current = arms_out;
         }
         if (clawPos.equals("open")) {
-            claw.setPosition(claw_open);
+            claw_current = claw_open;
         } else if (clawPos.equals("closed")) {
-            claw.setPosition(claw_closed);
+            claw_current = claw_closed;
         }
 
     }
