@@ -51,16 +51,14 @@ public class Onbot_HardwareITD {
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
-    // MOTOR VARIABLES
-    public int lift1_up = 1500;
-    public int lift1_down = 0;
-
+    // MOTOR POSITIONS
 
     public final int top = 8300;
     public final int mid = 2500;
 
     public final int horiMax = 5000;
     public int horiMin = 0;
+    public final int horiInSub = 100; //some tick number to where the intake would be considered inside of the submersible
 
     public double intakePower =0;
 

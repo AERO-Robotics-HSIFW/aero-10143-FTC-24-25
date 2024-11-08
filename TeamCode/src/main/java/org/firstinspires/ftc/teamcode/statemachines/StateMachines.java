@@ -78,9 +78,7 @@ public class StateMachines {
         gamepad1 = input1;
         gamepad2 = input2;
 
-        if (gamepad2.a) {
-            //you guys have to decide a control scheme, like will the drivers relay on the states to do all horizontal extension or will it be manual
-            // you cant mix the two
+        if (gamepad2.left_bumper) {
             robotState = robotStates.INTAKE_EXTEND;
         } else if(gamepad2.b) { // B is supposed to reverse the intake, but how would that be written in a state machine?
             // just set the intake power to be something
@@ -97,8 +95,7 @@ public class StateMachines {
     // The actual state machine logic
     public void stateMachineLogic() {
         switch (robotState) {
-            case INTAKE_START:
-
+            case INTAKE_START: // see input translation
                 break;
             case INTAKE_EXTEND:
 
