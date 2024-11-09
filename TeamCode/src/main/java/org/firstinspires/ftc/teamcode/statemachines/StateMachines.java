@@ -201,8 +201,10 @@ public class StateMachines {
             case LIFT_EXTEND:
                 if((hardware.lift1.getCurrentPosition() > 1500 && !top) || (hardware.lift1.getCurrentPosition() > 3300 && top)) {
                     armsTarget = hardware.armsPos("out");
-                    runtime.reset();
-                    robotState = robotStates.ARMS_OUT;
+                    if(gamepad1.right_bumper){
+                        runtime.reset();
+                        robotState = robotStates.ARMS_OUT;
+                    }
                 }
                 break;
 

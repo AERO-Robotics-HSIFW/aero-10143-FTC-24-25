@@ -57,7 +57,7 @@ public class Onbot_HardwareITD {
     public final int top = 3800;
     public final int mid = 2000;
 
-    public final int horiMax = 5000;
+    public final int horiMax = 4700;
     public final int horiInSub = 2000; //some tick number to where the intake would be considered inside of the submersible
 
     public double intakePower =0;
