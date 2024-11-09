@@ -89,11 +89,16 @@ public class StateMachines {
     public void inputTranslation(Gamepad input1, Gamepad input2) {
         gamepad1 = input1;
         gamepad2 = input2;
-        boolean manual = (gamepad2.left_stick_y >0.1 || gamepad2.left_stick_y<0.1 || gamepad2.right_bumper || gamepad2.dpad_right || gamepad2.y);
+        boolean manual = (gamepad2.left_stick_y >0.1 || gamepad2.left_stick_y<-0.1 || gamepad2.dpad_right || gamepad2.dpad_left);
 
         if (gamepad2.x) {
             robotState = robotStates.INTAKE_START;
-        } else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
+        }else if(gamepad2.left_bumper){
+            robotState = robotStates.INTAKE_IN;
+        }else if(gamepad2.right_bumper){
+            robotState = robotStates.INTAKE_RETRACT;
+        }
+        else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = 3800;
             top = true;
             robotState = robotStates.LIFT_EXTEND;
@@ -122,7 +127,8 @@ public class StateMachines {
     public void stateMachineLogic() {
         switch (robotState) {
             case INTAKE_START: // see input translation -> gp2 left bump signifies starting state machine
-                robotState = robotStates.INTAKE_IN;
+                intakePower = hardware.intakePowerSet(false,false);
+                clawTarget = hardware.clawState("open");
                 break;
             case INTAKE_EXTEND:
                 intakeFlipTarget = hardware.intakePosSet(horiTarget < hardware.horiInSub);
@@ -193,7 +199,7 @@ public class StateMachines {
                 break;
 
             case LIFT_EXTEND:
-                if((hardware.lift1.getCurrentPosition() == 1800 && !top) || (hardware.lift1.getCurrentPosition() == 3500 && top)) {
+                if((hardware.lift1.getCurrentPosition() > 1500 && !top) || (hardware.lift1.getCurrentPosition() > 3300 && top)) {
                     armsTarget = hardware.armsPos("out");
                     runtime.reset();
                     robotState = robotStates.ARMS_OUT;
@@ -201,10 +207,8 @@ public class StateMachines {
                 break;
 
             case ARMS_OUT:
-
-
                 if (runtime.milliseconds() > 1000) {
-                    hardware.clawState("open");
+                    clawTarget = hardware.clawState("open");
                     runtime.reset();
                     robotState = robotStates.LIFT_DUMP;
                 }
@@ -212,7 +216,7 @@ public class StateMachines {
 
             case LIFT_DUMP:
                 if (runtime.milliseconds() > 1000) {
-                    hardware.armsPos("in");
+                    armsTarget = hardware.armsPos("in");
                     runtime.reset();
                     robotState = robotStates.LIFT_RETRACT;
 
@@ -229,6 +233,9 @@ public class StateMachines {
                 if(gamepad2.dpad_right){
                     intakeFlipTarget = hardware.intakePosSet(true);
                     intakePower = hardware.intakePowerSet(true, false);
+                }
+                else if(gamepad2.dpad_left){
+                    intakePower = hardware.intakePowerSet(true,true);
                 }
                 robotState = prevState;
                 break;
