@@ -395,21 +395,26 @@ public class Onbot_HardwareITD {
     }
     public double intake(char largestColor, String teamColor){
         double returnValue;
-        if(teamColor.equals("red")){
-            if(largestColor == 'r' || largestColor == 'y'){
-                returnValue = intakePowerSet(false,true);
+        if(colorThreshold()){
+            if(teamColor.equals("red")){
+                if(largestColor == 'r' || largestColor == 'y'){
+                    returnValue = intakePowerSet(false,true);
+                }
+                else{
+                    returnValue = intakePowerSet(true, false);
+                }
             }
             else{
-                returnValue = intakePowerSet(true, false);
+                if(largestColor == 'b' || largestColor == 'y'){
+                    returnValue = intakePowerSet(false,true);
+                }
+                else{
+                    returnValue = intakePowerSet(true, false);
+                }
             }
         }
         else{
-            if(largestColor == 'b' || largestColor == 'y'){
-                returnValue = intakePowerSet(false,true);
-            }
-            else{
-                returnValue = intakePowerSet(true, false);
-            }
+            returnValue = 1;
         }
         return returnValue;
     }

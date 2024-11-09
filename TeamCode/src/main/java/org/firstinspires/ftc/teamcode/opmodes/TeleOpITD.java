@@ -42,15 +42,15 @@ import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
 @TeleOp(name="MainCode", group= "Linear OpMode")
 public class TeleOpITD extends LinearOpMode {
 
-    
+
     ElapsedTime runtime = new ElapsedTime();
     Onbot_HardwareITD robot = new Onbot_HardwareITD();
     StateMachines states = new StateMachines(robot);
 
     @Override
     public void runOpMode() {
-        
-        
+
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.initDrive(this);
@@ -60,9 +60,11 @@ public class TeleOpITD extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             states.inputTranslation(gamepad1,gamepad2);
+            states.stateMachineLogic();
             states.stateAction();
             states.teamColor = robot.toggleStrings(gamepad2.left_trigger > 0.75, "red", "blue", states.teamColor);
-            telemetry.addData("Lift Count", robot.lift1.getCurrentPosition());
+            telemetry.addData("Team Color", states.teamColor);
+            telemetry.addData("Horizontal Ticks", robot.horizontal.getTargetPosition());
             telemetry.update();
         }
     }

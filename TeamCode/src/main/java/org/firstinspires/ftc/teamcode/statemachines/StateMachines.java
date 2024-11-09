@@ -15,6 +15,8 @@ public class StateMachines {
         LIFT_RETRACT,
         INTAKE_START,
         INTAKE_EXTEND,
+        INTAKE_CHECK,
+        INTAKE_IN,
         INTAKE_OUT,
         INTAKE_GRAB,
         INTAKE_RETRACT,
@@ -117,16 +119,36 @@ public class StateMachines {
     public void stateMachineLogic() {
         switch (robotState) {
             case INTAKE_START: // see input translation -> gp2 left bump signifies starting state machine
+                robotState = robotStates.INTAKE_IN;
                 break;
             case INTAKE_EXTEND:
                 intakeFlipTarget = hardware.intakePosSet(horiTarget < hardware.horiInSub);
-                intakePower = hardware.intake(largestColor, teamColor);
-                if(hardware.intake.getPower() == 0) {
-                    horiTarget = hardware.horiSlidesSet(0);
-                    robotState = robotStates.INTAKE_GRAB;
+                if(hardware.colorThreshold()){
+                    runtime.reset();
+                    robotState = robotStates.INTAKE_CHECK;
                 }
                 break;
+            case INTAKE_CHECK:
 
+                if(runtime.milliseconds() > 500){
+                    largestColor = hardware.largestColor();
+                    intakePower = hardware.intake(largestColor, teamColor);
+                    if(intakePower == 1){
+                        robotState = robotStates.INTAKE_IN;
+                    }
+                    else if(intakePower == -1){
+                        robotState = robotStates.INTAKE_OUT;
+                    }
+                    else{
+                        horiTarget = hardware.horiSlidesSet(0);
+                        robotState = robotStates.INTAKE_GRAB;
+                    }
+                }
+                break;
+            case INTAKE_IN:
+                intakePower = hardware.intakePowerSet(true,true);
+                robotState = robotStates.INTAKE_EXTEND;
+                break;
             case INTAKE_OUT:
                 intakeFlipTarget = hardware.intakePosSet(true);
                 if(runtime.milliseconds() > 500){
@@ -197,12 +219,7 @@ public class StateMachines {
                 }
                 break;
             case MANUAL:
-                if(gamepad2.dpad_up){
-                    horiTarget = hardware.horiSlidesSet(horiTarget + 15);
-                }
-                else if(gamepad2.dpad_down){
-                    horiTarget = hardware.horiSlidesMan(horiTarget + 15);
-                }
+                horiTarget = hardware.horiSlidesMan(gamepad2.dpad_up?0.75:(gamepad2.dpad_down?-0.75:0));
                 if(gamepad2.dpad_right){
                     intakePower = hardware.intakePowerSet(true, false);
                 }
