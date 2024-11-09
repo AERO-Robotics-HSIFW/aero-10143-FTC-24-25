@@ -25,6 +25,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
+import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -44,6 +45,8 @@ public class TeleOpITD extends LinearOpMode {
     
     ElapsedTime runtime = new ElapsedTime();
     Onbot_HardwareITD robot = new Onbot_HardwareITD();
+    StateMachines states = new StateMachines();
+
     @Override
     public void runOpMode() {
         
@@ -56,13 +59,11 @@ public class TeleOpITD extends LinearOpMode {
         int num = 0;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            states.inputTranslation(gamepad1,gamepad2);
+            states.stateMachineLogic();
 
-            
-            
-            
             telemetry.addData("Lift Count", robot.lift1.getCurrentPosition());
             telemetry.update();
-            
         }
     }
 }
