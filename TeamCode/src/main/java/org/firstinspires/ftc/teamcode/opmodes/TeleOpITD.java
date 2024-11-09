@@ -65,6 +65,7 @@ public class TeleOpITD extends LinearOpMode {
             states.teamColor = robot.toggleStrings(gamepad2.left_trigger > 0.75, "red", "blue", states.teamColor);
             telemetry.addData("Team Color", states.teamColor);
             telemetry.addData("Horizontal Ticks", robot.horizontal.getTargetPosition());
+            telemetry.addData("Current State",states.robotState);
             telemetry.update();
         }
     }

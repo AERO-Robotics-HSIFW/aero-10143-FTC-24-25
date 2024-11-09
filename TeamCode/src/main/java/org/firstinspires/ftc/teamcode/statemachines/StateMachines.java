@@ -30,7 +30,7 @@ public class StateMachines {
     (That is for intake when looking in the hardware class)
     */
     Onbot_HardwareITD hardware = null;
-    robotStates robotState = robotStates.INTAKE_START;
+    public robotStates robotState = robotStates.INTAKE_START;
     ElapsedTime runtime;
     public int vertTarget;
 
@@ -55,6 +55,7 @@ public class StateMachines {
         armsTarget = hardware.arms_in;
         horiTarget = 0;
         vertTarget = 0;
+        clawTarget = hardware.clawState("open");
         intakeFlipTarget = hardware.intakeFlip_up;
     }
 
@@ -69,6 +70,8 @@ public class StateMachines {
 
         hardware.arm1.setPosition(armsTarget);
         hardware.arm2.setPosition(armsTarget);
+
+        hardware.claw.setPosition(clawTarget);
 
         hardware.intakeFlip1.setPosition(intakeFlipTarget);
         hardware.intakeFlip2.setPosition(intakeFlipTarget + hardware.intakeFlip2_offset);
@@ -86,10 +89,10 @@ public class StateMachines {
     public void inputTranslation(Gamepad input1, Gamepad input2) {
         gamepad1 = input1;
         gamepad2 = input2;
-        boolean manual = (gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.right_bumper || gamepad2.dpad_right);
+        boolean manual = (gamepad2.left_stick_y >0.1 || gamepad2.left_stick_y<0.1 || gamepad2.right_bumper || gamepad2.dpad_right || gamepad2.y);
 
-        if (gamepad2.left_bumper) {
-            robotState = robotStates.INTAKE_IN;
+        if (gamepad2.x) {
+            robotState = robotStates.INTAKE_START;
         } else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = 3800;
             top = true;
@@ -100,7 +103,7 @@ public class StateMachines {
             top = false;
             robotState = robotStates.LIFT_EXTEND;
         } else if (gamepad1.a) {
-            robotState = robotStates.LIFT_RETRACT;
+            //robotState = robotStates.LIFT_RETRACT;
         } else if (gamepad1.left_bumper) {
             robotState = robotStates.LIFT_DUMP;
         } else if(gamepad2.right_trigger > 0.9){
@@ -169,22 +172,23 @@ public class StateMachines {
             case INTAKE_RETRACT:
                 intakePower = hardware.intakePowerSet(true,true);
                 if(runtime.milliseconds() > 1500){
-                    robotState = robotStates.INTAKE_TRANSFER;
                     runtime.reset();
+                    robotState = robotStates.INTAKE_TRANSFER;
                 }
                 break;
 
             case INTAKE_TRANSFER:
                 if(runtime.milliseconds() > 500){
                     intakePower = hardware.intakePowerSet(false,false);
+                    armsTarget = hardware.armsPos("in");
+                    clawTarget = hardware.clawState("closed");
                     runtime.reset();
                     robotState = robotStates.LIFT_GRAB;
                 }
                 break;
 
             case LIFT_GRAB:
-                armsTarget = hardware.armsPos("in");
-                clawTarget = hardware.clawPos("closed");
+                //dpad_up top, dpad_down mid
 
                 break;
 
@@ -200,7 +204,7 @@ public class StateMachines {
 
 
                 if (runtime.milliseconds() > 1000) {
-                    hardware.clawPos("open");
+                    hardware.clawState("open");
                     runtime.reset();
                     robotState = robotStates.LIFT_DUMP;
                 }
@@ -221,14 +225,15 @@ public class StateMachines {
                 }
                 break;
             case MANUAL:
-                horiTarget = hardware.horiSlidesMan(gamepad2.dpad_up?0.75:(gamepad2.dpad_down?-0.75:0));
+                horiTarget = hardware.horiSlidesMan(-gamepad2.left_stick_y);
                 if(gamepad2.dpad_right){
+                    intakeFlipTarget = hardware.intakePosSet(true);
                     intakePower = hardware.intakePowerSet(true, false);
                 }
                 robotState = prevState;
                 break;
             case IDLE:
-                clawTarget = hardware.clawPos("open");
+                clawTarget = hardware.clawState("open");
                 armsTarget = hardware.armsPos("in");
                 intakeFlipTarget = hardware.intakePosSet(true);
                 intakePower = hardware.intakePowerSet(true, false);

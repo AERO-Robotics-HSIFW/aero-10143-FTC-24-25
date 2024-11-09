@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
 
 
 public class Onbot_HardwareITD {
@@ -58,8 +57,7 @@ public class Onbot_HardwareITD {
     public final int top = 3800;
     public final int mid = 2000;
 
-    public final int horiMax = 4000;
-    public int horiMin = 0;
+    public final int horiMax = 5000;
     public final int horiInSub = 2000; //some tick number to where the intake would be considered inside of the submersible
 
     public double intakePower =0;
@@ -306,9 +304,9 @@ public class Onbot_HardwareITD {
     }
     public int horiSlidesMan(double slide) {
         if (slide > 0.1 && horizontal.getTargetPosition() + 15 < horiMax && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
-            horiCurrent += (int)(15 * slide);
+            horiCurrent += (int)(50 * slide);
         } else if (slide < -0.1 && horizontal.getTargetPosition() - 15 > 0 && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
-            horiCurrent += (int)(15 * slide);
+            horiCurrent += (int)(50 * slide);
         }
         else if((slide<0.1 && slide>-0.1) &&lift1.getCurrentPosition()>0 && lift1.getCurrentPosition()<105) {
             horiCurrent = 0;
@@ -369,7 +367,7 @@ public class Onbot_HardwareITD {
         }
         return arms_current;
     }
-    public double clawPos(String clawPos){
+    public double clawState(String clawPos){
         if (clawPos.equals("open")) {
             claw_current = claw_open;
         } else if (clawPos.equals("closed")) {
