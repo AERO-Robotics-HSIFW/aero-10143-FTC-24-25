@@ -125,6 +125,7 @@ public class StateMachines {
                 intakeFlipTarget = hardware.intakePosSet(horiTarget < hardware.horiInSub);
                 if(hardware.colorThreshold()){
                     runtime.reset();
+                    intakeFlipTarget = hardware.intakePosSet(true);
                     intakePower = hardware.intakePowerSet(false, false);
                     robotState = robotStates.INTAKE_CHECK;
                 }
@@ -155,7 +156,6 @@ public class StateMachines {
                 intakeFlipTarget = hardware.intakePosSet(true);
                 if(runtime.milliseconds() > 500){
                     intakePower = hardware.intakePowerSet(true,true);
-                    intakeFlipTarget = hardware.intakePosSet(false);
                     robotState = robotStates.INTAKE_EXTEND;
                 }
                 break;
