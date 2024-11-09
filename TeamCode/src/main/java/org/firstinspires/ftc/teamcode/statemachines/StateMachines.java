@@ -132,8 +132,9 @@ public class StateMachines {
                 }
                  */
             case INTAKE_RETRACT:
-                //in your retract state you need something to tell the intake pivot servos to lift immediately
-                //hardware.intakeState("forward",true); *********
+                intakePower = -1;
+                intakeFlipTarget = 1; // Change this, 1 is only a subst.
+                hardware.horiSlidesSet(0);
                 if(runtime.milliseconds() > 1500){
                     robotState = robotStates.INTAKE_TRANSFER;
                     runtime.reset();
