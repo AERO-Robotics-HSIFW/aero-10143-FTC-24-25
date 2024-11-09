@@ -53,23 +53,23 @@ public class Onbot_HardwareITD {
 
     // MOTOR POSITIONS
 
-    public final int top = 8300;
-    public final int mid = 2500;
+    public final int top = 3800;
+    public final int mid = 2000;
 
     public final int horiMax = 5000;
     public int horiMin = 0;
-    public final int horiInSub = 100; //some tick number to where the intake would be considered inside of the submersible
+    public final int horiInSub = 2000; //some tick number to where the intake would be considered inside of the submersible
 
     public double intakePower =0;
 
     // SERVO POSITIONS
     public final double claw_open = 0.66;
     public final double claw_closed = 0.3;
-    public final double arms_out = 0.67;
+    public final double arms_out = 0.629;
     public final double arms_in = 0.5;
-    public final double intakeFlip_down = 0.416;
-    public final double intakeFlip_up = 0.50;
-    public final double intakeFlip2_offset = 0.03;
+    public final double intakeFlip_down = 0.338;
+    public final double intakeFlip_up = 0.433;
+    public final double intakeFlip2_offset = 0.095;
 
     // CURRENT POSITIONS
     public int vertCurrent = 0;
