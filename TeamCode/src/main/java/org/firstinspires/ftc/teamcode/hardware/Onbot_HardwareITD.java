@@ -58,7 +58,7 @@ public class Onbot_HardwareITD {
     public final int top = 3800;
     public final int mid = 2000;
 
-    public final int horiMax = 5000;
+    public final int horiMax = 4000;
     public int horiMin = 0;
     public final int horiInSub = 2000; //some tick number to where the intake would be considered inside of the submersible
 
@@ -391,7 +391,7 @@ public class Onbot_HardwareITD {
         return returnValue;
     }
     public boolean colorThreshold(){
-        return color.red() > 200 || color.green() > 200 || color.blue() > 200;
+        return color.red() > 150 || color.green() > 150 || color.blue() > 150;
     }
     public double intake(char largestColor, String teamColor){
         double returnValue;

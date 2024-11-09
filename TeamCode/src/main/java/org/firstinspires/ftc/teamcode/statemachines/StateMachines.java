@@ -89,7 +89,7 @@ public class StateMachines {
         boolean manual = (gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.right_bumper || gamepad2.dpad_right);
 
         if (gamepad2.left_bumper) {
-            robotState = robotStates.INTAKE_EXTEND;
+            robotState = robotStates.INTAKE_IN;
         } else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = 3800;
             top = true;
