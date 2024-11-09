@@ -137,6 +137,7 @@ public class StateMachines {
                         robotState = robotStates.INTAKE_IN;
                     }
                     else if(intakePower == -1){
+                        runtime.reset();
                         robotState = robotStates.INTAKE_OUT;
                     }
                     else{
