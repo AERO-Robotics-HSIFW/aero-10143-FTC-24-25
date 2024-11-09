@@ -28,7 +28,7 @@ public class StateMachines {
     (That is for intake when looking in the hardware class)
     */
     Onbot_HardwareITD hardware = null;
-    robotStates robotState = robotStates.INTAKE_EXTEND;
+    robotStates robotState = robotStates.INTAKE_START;
     ElapsedTime runtime;
     public int vertTarget;
 
@@ -47,8 +47,8 @@ public class StateMachines {
     public String teamColor = "red";
     public char largestColor = ' ';
     // Constructor initializing
-    public StateMachines() {
-        hardware = new Onbot_HardwareITD();
+    public StateMachines(Onbot_HardwareITD robot) {
+        hardware = robot;
         runtime = new ElapsedTime();
         armsTarget = hardware.arms_in;
         horiTarget = 0;

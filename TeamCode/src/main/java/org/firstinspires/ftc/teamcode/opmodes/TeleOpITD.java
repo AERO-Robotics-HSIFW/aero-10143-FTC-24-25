@@ -45,7 +45,7 @@ public class TeleOpITD extends LinearOpMode {
     
     ElapsedTime runtime = new ElapsedTime();
     Onbot_HardwareITD robot = new Onbot_HardwareITD();
-    StateMachines states = new StateMachines();
+    StateMachines states = new StateMachines(robot);
 
     @Override
     public void runOpMode() {
