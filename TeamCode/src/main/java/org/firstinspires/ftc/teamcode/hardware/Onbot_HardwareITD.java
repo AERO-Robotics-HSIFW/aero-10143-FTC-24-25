@@ -67,7 +67,7 @@ public class Onbot_HardwareITD {
     public final double claw_closed = 0.3;
     public final double arms_out = 0.629;
     public final double arms_in = 0.5;
-    public final double intakeFlip_down = 0.338;
+    public final double intakeFlip_down = 0.34;
     public final double intakeFlip_up = 0.433;
     public final double intakeFlip2_offset = 0.095;
 
