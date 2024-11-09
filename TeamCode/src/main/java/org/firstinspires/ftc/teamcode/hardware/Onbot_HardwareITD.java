@@ -308,7 +308,7 @@ public class Onbot_HardwareITD {
         if (slide > 0.1 && horizontal.getTargetPosition() + 15 < horiMax && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
             horiCurrent += (int)(15 * slide);
         } else if (slide < -0.1 && horizontal.getTargetPosition() - 15 > 0 && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
-            horiCurrent -= (int)(15 * slide);
+            horiCurrent += (int)(15 * slide);
         }
         else if((slide<0.1 && slide>-0.1) &&lift1.getCurrentPosition()>0 && lift1.getCurrentPosition()<105) {
             horiCurrent = 0;
