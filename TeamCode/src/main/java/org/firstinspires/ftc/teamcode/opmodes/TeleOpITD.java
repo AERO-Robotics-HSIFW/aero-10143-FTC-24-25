@@ -60,8 +60,8 @@ public class TeleOpITD extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             states.inputTranslation(gamepad1,gamepad2);
-            states.stateMachineLogic();
-
+            states.stateAction();
+            states.teamColor = robot.toggleStrings(gamepad2.left_trigger > 0.75, "red", "blue", states.teamColor);
             telemetry.addData("Lift Count", robot.lift1.getCurrentPosition());
             telemetry.update();
         }

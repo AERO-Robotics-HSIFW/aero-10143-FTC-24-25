@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
 
 
 public class Onbot_HardwareITD {
@@ -15,7 +17,7 @@ public class Onbot_HardwareITD {
     // DEFINE OPMORE MEMBERS
     private LinearOpMode myOpMode;
 
-    // ACCESS INSxTRUMENTS OF HUB
+    // ACCESS INSTRUMENTS OF HUB
     public IMU imu;
     Orientation angle;
     double botHeading;
@@ -40,7 +42,7 @@ public class Onbot_HardwareITD {
     public Servo intakeFlip1 = null;
     public Servo intakeFlip2 = null;
 
-
+    public ColorSensor color = null;
     // MOTOR POWERS
     public static double MAX_POWER = 1;
     public static double STRAFE_GAIN = 1.5;
@@ -121,6 +123,7 @@ public class Onbot_HardwareITD {
         encoderState("reset");
         encoderState("off");
 
+        color = myOpMode.hardwareMap.get(ColorSensor.class, "color");
         // BRAKES THE MOTORS
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -162,7 +165,7 @@ public class Onbot_HardwareITD {
         intakeFlip1.setPosition(intakeFlip_up);
         intakeFlip2.setPosition(intakeFlip_up + intakeFlip2_offset);
 
-
+        color.enableLed(true);
 
     }
 
@@ -283,21 +286,23 @@ public class Onbot_HardwareITD {
 
     }
     //Set directions for intake
-    public void intakePowerSet(boolean on, boolean inRobot) {
+    public double intakePowerSet(boolean on, boolean inRobot) {
         if(on){
             intakePower = inRobot?1:-1; //inRobot signifies whether intake will be bringing samples into the robot
         }
         else{
             intakePower = 0;
         }
+        return intakePower;
     }
-    public void intakePosSet(boolean up){
+    public double intakePosSet(boolean up){
         if(up){
             intakeFlip_current = intakeFlip_up;
         }
         else{
             intakeFlip_current = intakeFlip_down;
         }
+        return intakeFlip_current;
     }
     public int horiSlidesMan(double slide) {
         if (slide > 0.1 && horizontal.getTargetPosition() + 15 < horiMax && Math.abs(horizontal.getTargetPosition() - horizontal.getCurrentPosition()) < 1000) {
@@ -355,18 +360,57 @@ public class Onbot_HardwareITD {
         claw_current = toggleDoubles(clawButton, claw_open, claw_closed, claw_current);
     }
     //SET POSITIONS
-    public void armsSet(String armPos, String clawPos) {
+    public double armsPos(String armPos) {
         //METHOD FOR SET VALUES
         if (armPos.equals("in")) {
             arms_current = arms_in;
         } else if (armPos.equals("out")) {
             arms_current = arms_out;
         }
+        return arms_current;
+    }
+    public double clawPos(String clawPos){
         if (clawPos.equals("open")) {
             claw_current = claw_open;
         } else if (clawPos.equals("closed")) {
             claw_current = claw_closed;
         }
-
+        return claw_current;
+    }
+    public char largestColor(){
+        char returnValue = ' ';
+        if(color.green()> color.red() && (color.green()>color.blue())){
+            returnValue= 'g';
+        }
+        else if(color.red()>color.green() && (color.red() > color.blue())){
+            returnValue = 'r';
+        }
+        else{
+            returnValue= 'b';
+        }
+        return returnValue;
+    }
+    public boolean colorThreshold(){
+        return color.red() > 200 || color.green() > 200 || color.blue() > 200;
+    }
+    public double intake(char largestColor, String teamColor){
+        double returnValue;
+        if(teamColor.equals("red")){
+            if(largestColor == 'r' || largestColor == 'y'){
+                returnValue = intakePowerSet(false,true);
+            }
+            else{
+                returnValue = intakePowerSet(true, false);
+            }
+        }
+        else{
+            if(largestColor == 'b' || largestColor == 'y'){
+                returnValue = intakePowerSet(false,true);
+            }
+            else{
+                returnValue = intakePowerSet(true, false);
+            }
+        }
+        return returnValue;
     }
 }

@@ -9,18 +9,17 @@ import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
 public class StateMachines {
     public enum robotStates {
         IDLE,
-        LIFT_START,
         LIFT_EXTEND,
         LIFT_GRAB,
         LIFT_DUMP,
         LIFT_RETRACT,
         INTAKE_START,
         INTAKE_EXTEND,
+        INTAKE_OUT,
         INTAKE_GRAB,
         INTAKE_RETRACT,
         INTAKE_TRANSFER,
         ARMS_OUT,
-        ARMS_IN,
         MANUAL
     }
 
@@ -34,16 +33,19 @@ public class StateMachines {
     public int vertTarget;
 
     public double armsTarget;
+    public double clawTarget;
 
     public double intakeFlipTarget;
 
-    public int intakePower;
+    public double intakePower;
 
     public int horiTarget;
     private robotStates prevState = robotState;
     private Gamepad gamepad1;
     private Gamepad gamepad2;
-
+    private boolean top = false;
+    public String teamColor = "red";
+    public char largestColor = ' ';
     // Constructor initializing
     public StateMachines() {
         hardware = new Onbot_HardwareITD();
@@ -82,24 +84,25 @@ public class StateMachines {
     public void inputTranslation(Gamepad input1, Gamepad input2) {
         gamepad1 = input1;
         gamepad2 = input2;
-        boolean manual = (gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.right_bumper);
+        boolean manual = (gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.right_bumper || gamepad2.dpad_right);
 
         if (gamepad2.left_bumper) {
             robotState = robotStates.INTAKE_EXTEND;
-        } else if(gamepad2.b) { // B is supposed to reverse the intake, but how would that be written in a state machine?
-            // just set the intake power to be something
-            robotState = robotStates.INTAKE_EXTEND;
-        } else if (gamepad1.dpad_up) {
+        } else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = 3800;
+            top = true;
             robotState = robotStates.LIFT_EXTEND;
-        } else if (gamepad1.dpad_down) {
+
+        } else if (gamepad1.dpad_down && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = 2000;
+            top = false;
             robotState = robotStates.LIFT_EXTEND;
         } else if (gamepad1.a) {
             robotState = robotStates.LIFT_RETRACT;
         } else if (gamepad1.left_bumper) {
             robotState = robotStates.LIFT_DUMP;
-        } else {
+        } else if(gamepad2.right_trigger > 0.9){
+            runtime.reset();
             robotState = robotStates.IDLE;
         }
 
@@ -116,25 +119,31 @@ public class StateMachines {
             case INTAKE_START: // see input translation -> gp2 left bump signifies starting state machine
                 break;
             case INTAKE_EXTEND:
-                hardware.intakePosSet(horiTarget < hardware.horiInSub);
+                intakeFlipTarget = hardware.intakePosSet(horiTarget < hardware.horiInSub);
+                intakePower = hardware.intake(largestColor, teamColor);
+                if(hardware.intake.getPower() == 0) {
+                    horiTarget = hardware.horiSlidesSet(0);
+                    robotState = robotStates.INTAKE_GRAB;
+                }
+                break;
+
+            case INTAKE_OUT:
+                intakeFlipTarget = hardware.intakePosSet(true);
+                if(runtime.milliseconds() > 500){
+                    intakePower = hardware.intakePowerSet(true,true);
+                    intakeFlipTarget = hardware.intakePosSet(false);
+                    robotState = robotStates.INTAKE_EXTEND;
+                }
                 break;
             case INTAKE_GRAB:
-
-                break;
-                 //I think this implementation is wrong. You should not be doing manual control here.
-                /* here is something better:
-                //if robot picks up something colored then start retracting
-                if(colorSensor.blue() > some number){
-                    hardware.horizontal.setTargetPosition(0);
-                    intake needs to be pivoted up to avoid crashing into barrier
-                    runtime.reset();
+                intakePower = hardware.intakePowerSet(false,false);
+                if(hardware.horizontal.getCurrentPosition() < 100){
                     robotState = robotStates.INTAKE_RETRACT;
                 }
-                 */
+                break;
+
             case INTAKE_RETRACT:
-                intakePower = -1;
-                intakeFlipTarget = 1; // Change this, 1 is only a subst.
-                hardware.horiSlidesSet(0);
+                intakePower = hardware.intakePowerSet(true,true);
                 if(runtime.milliseconds() > 1500){
                     robotState = robotStates.INTAKE_TRANSFER;
                     runtime.reset();
@@ -143,57 +152,72 @@ public class StateMachines {
 
             case INTAKE_TRANSFER:
                 if(runtime.milliseconds() > 500){
+                    intakePower = hardware.intakePowerSet(false,false);
                     runtime.reset();
                     robotState = robotStates.LIFT_GRAB;
                 }
                 break;
 
             case LIFT_GRAB:
-                hardware.armsSet("in","in");
-                if (runtime.milliseconds() == 500) {
-                    robotState = robotStates.LIFT_EXTEND;
-                }
+                armsTarget = hardware.armsPos("in");
+                clawTarget = hardware.clawPos("closed");
+
                 break;
 
             case LIFT_EXTEND:
-                if(hardware.lift1.getCurrentPosition() == 2000 || hardware.lift1.getCurrentPosition() == 3800) {
+                if((hardware.lift1.getCurrentPosition() == 1800 && !top) || (hardware.lift1.getCurrentPosition() == 3500 && top)) {
+                    armsTarget = hardware.armsPos("out");
                     runtime.reset();
                     robotState = robotStates.ARMS_OUT;
                 }
                 break;
 
             case ARMS_OUT:
-                hardware.armsSet("out","in");
-                if (runtime.milliseconds() == 1000) {
+
+
+                if (runtime.milliseconds() > 1000) {
+                    hardware.clawPos("open");
                     runtime.reset();
                     robotState = robotStates.LIFT_DUMP;
                 }
                 break;
 
             case LIFT_DUMP:
-                hardware.armsSet("out","out");
-                if (runtime.milliseconds() == 1000) {
-                    robotState = robotStates.ARMS_IN;
+                if (runtime.milliseconds() > 1000) {
+                    hardware.armsPos("in");
+                    runtime.reset();
+                    robotState = robotStates.LIFT_RETRACT;
+
                 }
                 break;
-
-           case ARMS_IN:
-               hardware.armsSet("in","in");
-               robotState = robotStates.LIFT_RETRACT;
-               break;
-
             case LIFT_RETRACT:
-                vertTarget = 0;
-                robotState = robotStates.INTAKE_START;
+                if(runtime.milliseconds() > 500){
+                    vertTarget = hardware.vertSlidesSet(0);
+                    robotState = robotStates.INTAKE_START;
+                }
                 break;
             case MANUAL:
                 if(gamepad2.dpad_up){
-                    hardware.horiSlidesMan(1);
+                    horiTarget = hardware.horiSlidesSet(horiTarget + 15);
                 }
                 else if(gamepad2.dpad_down){
-                    hardware.horiSlidesMan(-1);
+                    horiTarget = hardware.horiSlidesMan(horiTarget + 15);
+                }
+                if(gamepad2.dpad_right){
+                    intakePower = hardware.intakePowerSet(true, false);
                 }
                 robotState = prevState;
+                break;
+            case IDLE:
+                clawTarget = hardware.clawPos("open");
+                armsTarget = hardware.armsPos("in");
+                intakeFlipTarget = hardware.intakePosSet(true);
+                intakePower = hardware.intakePowerSet(true, false);
+                if(runtime.milliseconds() > 2000){
+                    vertTarget = 0;
+                    horiTarget = 0;
+                    robotState = robotStates.INTAKE_START;
+                }
                 break;
             default:
                 //default state needs to be initialization position
