@@ -109,7 +109,7 @@ public class Onbot_HardwareITD {
         frontRight = myOpMode.hardwareMap.get(DcMotor.class, "frontRight");
         backLeft = myOpMode.hardwareMap.get(DcMotor.class, "backLeft");
         backRight = myOpMode.hardwareMap.get(DcMotor.class, "backRight");
-        lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift");
+        lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift1");
         intake = myOpMode.hardwareMap.get(DcMotorEx.class, "intake");
         horizontal = myOpMode.hardwareMap.get(DcMotorEx.class, "horizontal");
 
@@ -380,7 +380,7 @@ public class Onbot_HardwareITD {
     public char largestColor(){
         char returnValue = ' ';
         if(color.green()> color.red() && (color.green()>color.blue())){
-            returnValue= 'g';
+            returnValue= 'y';
         }
         else if(color.red()>color.green() && (color.red() > color.blue())){
             returnValue = 'r';

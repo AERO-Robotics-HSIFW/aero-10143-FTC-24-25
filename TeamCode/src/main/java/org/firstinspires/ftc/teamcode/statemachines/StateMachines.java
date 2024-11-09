@@ -125,12 +125,12 @@ public class StateMachines {
                 intakeFlipTarget = hardware.intakePosSet(horiTarget < hardware.horiInSub);
                 if(hardware.colorThreshold()){
                     runtime.reset();
+                    intakePower = hardware.intakePowerSet(false, false);
                     robotState = robotStates.INTAKE_CHECK;
                 }
                 break;
             case INTAKE_CHECK:
-
-                if(runtime.milliseconds() > 500){
+                if(runtime.milliseconds() > 250){
                     largestColor = hardware.largestColor();
                     intakePower = hardware.intake(largestColor, teamColor);
                     if(intakePower == 1){
@@ -142,6 +142,7 @@ public class StateMachines {
                     }
                     else{
                         horiTarget = hardware.horiSlidesSet(0);
+                        intakeFlipTarget = hardware.intakePosSet(true);
                         robotState = robotStates.INTAKE_GRAB;
                     }
                 }
