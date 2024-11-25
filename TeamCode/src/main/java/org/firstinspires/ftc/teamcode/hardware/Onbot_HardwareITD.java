@@ -167,6 +167,21 @@ public class Onbot_HardwareITD {
 
     }
 
+    public void autoMovement(int forward, int sideways) {
+        encoderState("run");
+        encoderState("position");
+        if (forward != 0) {
+            frontRight.setTargetPosition(forward);
+            frontLeft.setTargetPosition(forward);
+            backRight.setTargetPosition(forward);
+            backLeft.setTargetPosition(forward);
+        }
+        if (sideways != 0) {
+            backRight.setTargetPosition(sideways);
+            backLeft.setTargetPosition(sideways);
+        }
+    }
+
     public void resetHeading() {
         imu.resetYaw();
     }

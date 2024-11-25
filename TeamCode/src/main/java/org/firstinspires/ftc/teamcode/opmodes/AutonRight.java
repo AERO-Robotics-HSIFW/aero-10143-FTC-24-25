@@ -3,25 +3,27 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
 import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
 
-@Autonomous(name="AutonRight", group= "Autonomous")
-public class AutonRight extends OpMode {
+@Autonomous(name="AutonRight", group= "LinearOpMode")
+public class AutonRight extends LinearOpMode {
     Onbot_HardwareITD robot = null;
     StateMachines robotState = null;
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
         robot = new Onbot_HardwareITD();
         robotState = new StateMachines(robot);
 
-    }
+        robot.initDrive(this);
+        waitForStart();
 
-    @Override
-    public void loop() {
-
+        while (opModeIsActive()) {
+            robot.autoMovement(500,0);
+        }
     }
 }
