@@ -24,10 +24,10 @@ public class Onbot_HardwareITD {
     // SENSORS
 
     // MOTOR DECLARATIONS - MOVEMENT
-    public DcMotor frontLeft = null;
-    public DcMotor frontRight = null;
-    public DcMotor backLeft = null;
-    public DcMotor backRight = null;
+    public DcMotorEx frontLeft = null;
+    public DcMotorEx frontRight = null;
+    public DcMotorEx backLeft = null;
+    public DcMotorEx backRight = null;
 
     // MOTOR DECLARATIONS - SUBSYSTEMS
     public DcMotorEx lift1 = null;
@@ -47,8 +47,9 @@ public class Onbot_HardwareITD {
     public static double STRAFE_GAIN = 1.5;
     public static double COUNTS_PER_MOTOR_REV = 537.7; // 28 for REV ;
     public static double DRIVE_GEAR_REDUCTION = 1.0; //   12 for REV;
-    public static double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    public static double WHEEL_DIAMETER_INCHES = 3.779;     // For figuring circumference
     public static double ROBOT_DIAMETER_INCHES = 4.0;
+    public static double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER_INCHES * 3.14;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
@@ -103,10 +104,10 @@ public class Onbot_HardwareITD {
         imu.initialize(parameters);
 
         //motors
-        frontLeft = myOpMode.hardwareMap.get(DcMotor.class, "frontLeft");
-        frontRight = myOpMode.hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = myOpMode.hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = myOpMode.hardwareMap.get(DcMotor.class, "backRight");
+        frontLeft = myOpMode.hardwareMap.get(DcMotorEx.class, "frontLeft");
+        frontRight = myOpMode.hardwareMap.get(DcMotorEx.class, "frontRight");
+        backLeft = myOpMode.hardwareMap.get(DcMotorEx.class, "backLeft");
+        backRight = myOpMode.hardwareMap.get(DcMotorEx.class, "backRight");
         lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift1");
         intake = myOpMode.hardwareMap.get(DcMotorEx.class, "intake");
         horizontal = myOpMode.hardwareMap.get(DcMotorEx.class, "horizontal");
@@ -167,19 +168,24 @@ public class Onbot_HardwareITD {
 
     }
 
-    public void autoMovement(int forward, int sideways) {
+    public void autoMovement(int rotAmount) {
         encoderState("run");
+        int frontTarget = 527 * rotAmount;
+        int backTarget = 527 * (rotAmount / 2);
+
+        frontRight.setTargetPosition(frontTarget);
+        frontLeft.setTargetPosition(frontTarget);
+        backRight.setTargetPosition(backTarget);
+        backLeft.setTargetPosition(backTarget);
+
         encoderState("position");
-        if (forward != 0) {
-            frontRight.setTargetPosition(forward);
-            frontLeft.setTargetPosition(forward);
-            backRight.setTargetPosition(forward);
-            backLeft.setTargetPosition(forward);
-        }
-        if (sideways != 0) {
-            backRight.setTargetPosition(sideways);
-            backLeft.setTargetPosition(sideways);
-        }
+
+        frontRight.setPower(0.5);
+        frontLeft.setPower(0.5);
+        backRight.setPower(0.25);
+        backLeft.setPower(0.25);
+
+
     }
 
     public void resetHeading() {
