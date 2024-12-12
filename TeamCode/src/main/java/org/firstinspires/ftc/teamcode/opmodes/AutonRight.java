@@ -28,20 +28,5 @@ public class AutonRight extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        SampleMecanumDrive autoTestPath = new SampleMecanumDrive(hardwareMap);
-
-        Trajectory myTrajectory = autoTestPath.trajectoryBuilder(new Pose2d(10,5))
-                .forward(10)
-                .build();
-
-        Trajectory myTrajectory2 = autoTestPath.trajectoryBuilder(new Pose2d(10,5))
-                .strafeLeft(2.1)
-                .build();
-
-        if (isStopRequested()) return;
-
-        autoTestPath.followTrajectory(myTrajectory);
-        autoTestPath.followTrajectory(myTrajectory2);
-
     }
 }

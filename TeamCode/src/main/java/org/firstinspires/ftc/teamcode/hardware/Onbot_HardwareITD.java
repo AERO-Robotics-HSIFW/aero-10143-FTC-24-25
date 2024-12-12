@@ -169,21 +169,25 @@ public class Onbot_HardwareITD {
     }
 
     public void autoMovement(int rotAmount) {
-        encoderState("run");
-        int frontTarget = 527 * rotAmount;
-        int backTarget = 527 * (rotAmount / 2);
+        if (rotAmount != 0) {
+            encoderState("run");
+            int frontTarget = 527 * rotAmount;
+            int backTarget = 527 * (rotAmount / 2);
 
-        frontRight.setTargetPosition(frontTarget);
-        frontLeft.setTargetPosition(frontTarget);
-        backRight.setTargetPosition(backTarget);
-        backLeft.setTargetPosition(backTarget);
+            frontRight.setTargetPosition(frontTarget);
+            frontLeft.setTargetPosition(frontTarget);
+            backRight.setTargetPosition(backTarget);
+            backLeft.setTargetPosition(backTarget);
 
-        encoderState("position");
+            encoderState("position");
 
-        frontRight.setPower(0.5);
-        frontLeft.setPower(0.5);
-        backRight.setPower(0.25);
-        backLeft.setPower(0.25);
+            frontRight.setPower(0.5);
+            frontLeft.setPower(0.5);
+            backRight.setPower(0.25);
+            backLeft.setPower(0.25);
+
+        }
+
 
 
     }
