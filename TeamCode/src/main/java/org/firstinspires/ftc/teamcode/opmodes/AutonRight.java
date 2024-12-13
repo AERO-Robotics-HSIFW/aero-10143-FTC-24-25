@@ -21,12 +21,22 @@ public class AutonRight extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime();
     @Override
     public void runOpMode() throws InterruptedException {
-        robot = new Onbot_HardwareITD();
-        robotState = new StateMachines(robot);
 
-        robot.initDrive(this);
-        waitForStart();
-        runtime.reset();
+            robot = new Onbot_HardwareITD();
+            robotState = new StateMachines(robot);
 
+            robot.initDrive(this);
+            waitForStart();
+            if(opModeIsActive()){
+                robot.autoMovement(10,0,0,1);
+                sleep(200);
+                robot.autoMovement(0,15,0,1);
+//                sleep(200);
+//                robot.autoMovement(0,0,180,1);
+//                sleep(200);
+//                robot.autoMovement(0,0,-180,1);
+//                sleep(200);
+//                robot.autoMovement(0,0,90,1);
+            }
     }
 }

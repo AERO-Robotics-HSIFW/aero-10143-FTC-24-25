@@ -47,11 +47,12 @@ public class Onbot_HardwareITD {
     public static double STRAFE_GAIN = 1.5;
     public static double COUNTS_PER_MOTOR_REV = 537.7; // 28 for REV ;
     public static double DRIVE_GEAR_REDUCTION = 1.0; //   12 for REV;
-    public static double WHEEL_DIAMETER_INCHES = 3.779;     // For figuring circumference
-    public static double ROBOT_DIAMETER_INCHES = 4.0;
-    public static double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER_INCHES * 3.14;
+    public static double WHEEL_DIAMETER_INCHES = 3.77953;     // For figuring circumference
+    public static double ROBOT_DIAMETER_INCHES = 20.0;
+    public static double ROBOT_CIRCUMFERENCE = ROBOT_DIAMETER_INCHES * Math.PI;
+    public static double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER_INCHES * Math.PI;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
+            WHEEL_CIRCUMFERENCE;
 
     // MOTOR POSITIONS
 
@@ -168,27 +169,38 @@ public class Onbot_HardwareITD {
 
     }
 
-    public void autoMovement(int rotAmount) {
-        if (rotAmount != 0) {
-            encoderState("run");
-            int frontTarget = 527 * rotAmount;
-            int backTarget = 527 * (rotAmount / 2);
-
-            frontRight.setTargetPosition(frontTarget);
-            frontLeft.setTargetPosition(frontTarget);
-            backRight.setTargetPosition(backTarget);
-            backLeft.setTargetPosition(backTarget);
-
-            encoderState("position");
-
-            frontRight.setPower(0.5);
-            frontLeft.setPower(0.5);
-            backRight.setPower(0.25);
-            backLeft.setPower(0.25);
-
-        }
+    public void autoMovement(int forw, int side, int spin, int power) {
+        int forwardCount = (int) (forw*COUNTS_PER_INCH);
+        int sideCount = (int) (side*COUNTS_PER_INCH);
+        spin = (int) ((spin%360)/180.0*ROBOT_CIRCUMFERENCE * COUNTS_PER_INCH*1.375);
+        int turnCount = spin;
 
 
+        int frontLeftTarget = frontLeft.getCurrentPosition() + (forwardCount + sideCount + turnCount);
+        int frontRightTarget = frontRight.getCurrentPosition()+ (forwardCount - sideCount - turnCount);
+        int backLeftTarget = backLeft.getCurrentPosition()+ (forwardCount - sideCount + turnCount);
+        int backRightTarget = backRight.getCurrentPosition()+ (forwardCount + sideCount - turnCount);
+
+       frontRight.setTargetPosition(frontRightTarget);
+       frontLeft.setTargetPosition(frontLeftTarget);
+       backRight.setTargetPosition(backRightTarget);
+       backLeft.setTargetPosition(backLeftTarget);
+
+
+        encoderState("position");
+        double isTurn = spin!=0?0.5:1;
+        frontRight.setPower(power);
+        frontLeft.setPower(power);
+        backRight.setPower(power*isTurn);
+        backLeft.setPower(power*isTurn);
+
+        while(frontRight.isBusy() && frontLeft.isBusy() && backRight.isBusy() && backLeft.isBusy());
+        encoderState("run");
+
+        frontRight.setPower(0);
+        frontLeft.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
 
     }
 
