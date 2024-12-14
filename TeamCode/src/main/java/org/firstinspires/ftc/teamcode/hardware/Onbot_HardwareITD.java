@@ -523,7 +523,8 @@ public class Onbot_HardwareITD {
         return returnValue;
     }
     public boolean colorThreshold(){
-        return color.red() > 150 || color.green() > 150 || color.blue() > 150;
+        int threshold = 300;
+        return color.red() > threshold || color.green() > threshold || color.blue() > threshold;
     }
     public double intake(char largestColor, String teamColor){
         double returnValue;
