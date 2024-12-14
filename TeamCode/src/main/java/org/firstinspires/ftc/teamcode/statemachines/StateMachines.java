@@ -89,11 +89,12 @@ public class StateMachines {
     public void inputTranslation(Gamepad input1, Gamepad input2) {
         gamepad1 = input1;
         gamepad2 = input2;
-        boolean manual = (gamepad2.left_stick_y >0.1 || gamepad2.left_stick_y<-0.1 || gamepad2.dpad_right || gamepad2.dpad_left);
-
+        boolean manual2 = (gamepad2.left_stick_y >0.1 || gamepad2.left_stick_y<-0.1 || gamepad2.dpad_right || gamepad2.dpad_left || gamepad2.b);
+        boolean manual1 = (gamepad1.left_trigger > 0.5 || gamepad1.right_trigger > 0.5 || gamepad1.b || gamepad1.a|| gamepad1.dpad_left || gamepad1.dpad_right);
         if (gamepad2.x) {
             robotState = robotStates.INTAKE_START;
-        }else if(gamepad2.left_bumper){
+        }
+        else if(gamepad2.left_bumper){
             robotState = robotStates.INTAKE_IN;
         }else if(gamepad2.right_bumper){
             robotState = robotStates.INTAKE_RETRACT;
@@ -116,7 +117,7 @@ public class StateMachines {
             robotState = robotStates.IDLE;
         }
 
-        if(manual){
+        if(manual1 || manual2){
             prevState = robotState; //if it runs again prevState will never be set to manual
             robotState =  robotStates.MANUAL;
         }
@@ -128,7 +129,7 @@ public class StateMachines {
         switch (robotState) {
             case INTAKE_START: // see input translation -> gp2 left bump signifies starting state machine
                 intakePower = hardware.intakePowerSet(false,false);
-                clawTarget = hardware.clawState("open");
+
                 break;
             case INTAKE_EXTEND:
                 intakeFlipTarget = hardware.intakePosSet(horiTarget < hardware.horiInSub);
@@ -158,7 +159,9 @@ public class StateMachines {
                 }
                 break;
             case INTAKE_IN:
-                intakePower = hardware.intakePowerSet(true,true);
+                hardware.intakePower = 0.75;
+                clawTarget = hardware.clawState("open");
+                intakePower = hardware.intakePower;
                 robotState = robotStates.INTAKE_EXTEND;
                 break;
             case INTAKE_OUT:
@@ -201,15 +204,13 @@ public class StateMachines {
             case LIFT_EXTEND:
                 if((hardware.lift1.getCurrentPosition() > 1500 && !top) || (hardware.lift1.getCurrentPosition() > 3300 && top)) {
                     armsTarget = hardware.armsPos("out");
-                    if(gamepad1.right_bumper){
-                        runtime.reset();
-                        robotState = robotStates.ARMS_OUT;
-                    }
+                    runtime.reset();
+                    robotState=robotStates.ARMS_OUT;
                 }
                 break;
 
             case ARMS_OUT:
-                if (runtime.milliseconds() > 1000) {
+                if(gamepad1.right_bumper){
                     clawTarget = hardware.clawState("open");
                     runtime.reset();
                     robotState = robotStates.LIFT_DUMP;
@@ -239,6 +240,28 @@ public class StateMachines {
                 else if(gamepad2.dpad_left){
                     intakePower = hardware.intakePowerSet(true,true);
                 }
+                boolean armsReady = (prevState.equals(robotStates.ARMS_OUT) || prevState.equals(robotStates.INTAKE_START));
+                if(gamepad1.right_trigger > 0.5&& armsReady){
+                    armsTarget = hardware.armsPos(armsTarget+0.001);
+                }
+                else if(gamepad1.left_trigger > 0.5 && armsReady){
+                    armsTarget = hardware.armsPos(armsTarget-0.001);
+                }
+                if(armsReady && gamepad1.b){
+                    clawTarget = hardware.clawState("closed");
+                }
+                else if(armsReady && gamepad1.a){
+                    clawTarget = hardware.clawState("open");
+                }
+
+                if(gamepad1.dpad_left&&armsReady){
+                    vertTarget = hardware.liftMan(0.5, false,false);
+                }
+                else if(gamepad1.dpad_right&&armsReady){
+                    vertTarget = hardware.liftMan(-0.5,false,false);
+                }
+
+                // program manual slide control + claaw
                 robotState = prevState;
                 break;
             case IDLE:
@@ -259,4 +282,5 @@ public class StateMachines {
 
         }
     }
+
 }
