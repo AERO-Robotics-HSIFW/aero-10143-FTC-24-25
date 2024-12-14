@@ -29,8 +29,7 @@ public class AutonLeft extends LinearOpMode {
             sleep(100);
             robot.autoMovement(0,0,20,0.5);
             robot.vertSlidesSet(robot.top);
-
-            sleep(100);
+            while(robot.lift1.getCurrentPosition() < robot.top-500);
             robot.autoMovement(6,0,0,0.5);
             robot.horiSlidesSet(robot.horiMax);
             sleep(100);
