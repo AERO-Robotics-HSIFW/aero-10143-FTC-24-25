@@ -92,17 +92,15 @@ public class StateMachines {
     public void inputTranslation(Gamepad input1, Gamepad input2) {
         gamepad1 = input1;
         gamepad2 = input2;
-        boolean manual2 = (gamepad2.left_stick_y >0.1 || gamepad2.left_stick_y<-0.1 || gamepad2.dpad_right || gamepad2.dpad_left || gamepad2.b);
-        boolean manual1 = (gamepad1.left_trigger > 0.5 || gamepad1.right_trigger > 0.5 || gamepad1.b || gamepad1.a|| gamepad1.dpad_left || gamepad1.dpad_right || gamepad1.y || gamepad1.left_bumper);
+        boolean manual2 = (gamepad2.left_stick_y > 0.1 || gamepad2.left_stick_y < -0.1 || gamepad2.dpad_right || gamepad2.dpad_left || gamepad2.b);
+        boolean manual1 = (gamepad1.left_trigger > 0.5 || gamepad1.right_trigger > 0.5 || gamepad1.b || gamepad1.a || gamepad1.dpad_left || gamepad1.dpad_right || gamepad1.y || gamepad1.left_bumper);
         if (gamepad2.x) {
             robotState = robotStates.INTAKE_START;
-        }
-        else if(gamepad2.left_bumper){
+        } else if (gamepad2.left_bumper) {
             robotState = robotStates.INTAKE_IN;
-        }else if(gamepad2.right_bumper){
+        } else if (gamepad2.right_bumper) {
             robotState = robotStates.INTAKE_RETRACT;
-        }
-        else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
+        } else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = 3800;
             top = true;
             robotState = robotStates.LIFT_EXTEND;
@@ -113,13 +111,13 @@ public class StateMachines {
             robotState = robotStates.LIFT_EXTEND;
         } else if (gamepad1.a) {
             //robotState = robotStates.LIFT_RETRACT;
-        } else if (gamepad1.left_bumper && robotState.equals(robotStates.ARMS_OUT)) {
-            robotState = robotStates.LIFT_DUMP;
-        } else if(gamepad2.right_trigger > 0.9){
+        }else if (gamepad2.right_trigger > 0.9) {
             runtime.reset();
             robotState = robotStates.IDLE;
-        } else if(gamepad1.left_bumper && robotState.equals(robotStates.SPECIMEN_INIT)){
-            robotState = robotStates.SPECIMEN_GRAB;
+        } else if (gamepad1.y && robotState.equals(robotStates.LIFT_GRAB)) {
+            robotState = robotStates.SPECIMEN_INIT;
+        } else if (gamepad1.left_bumper && robotState.equals(robotStates.SPECIMEN_INIT)){
+            robotState = robotStates.ARMS_OUT;
         }
 
         if(manual1 || manual2){
@@ -200,9 +198,12 @@ public class StateMachines {
                 }
                 break;
             case SPECIMEN_INIT:
-                vertTarget =hardware.vertSlidesSet(500);
+                vertTarget =hardware.vertSlidesSet(900);
                 if(runtime.milliseconds() > 500){
-                    armsTarget = hardware.armsPos(0.8);
+                    armsTarget = hardware.armsPos(0.6725);
+                    if(runtime.milliseconds() > 1500) {
+                        vertTarget = hardware.vertSlidesSet(0);
+                    }
                 }
                 break;
             case SPECIMEN_GRAB:
@@ -231,21 +232,25 @@ public class StateMachines {
                     runtime.reset();
                     robotState = robotStates.LIFT_DUMP;
                 }
-                else if(gamepad1.dpad_down){
-                    armsTarget = hardware.armsPos(0.8);
+                else if(gamepad1.y){
+                    armsTarget = hardware.armsPos(0.6);
                     runtime.reset();
-                    robotState=robotStates.LIFT_DUMP;
                 }
                 break;
+
             case SPECIMEN_RELEASE:
+                armsTarget = hardware.armsPos(0.6725);
                 if(runtime.milliseconds() > 500){
-                    runtime.reset();
                     clawTarget = hardware.clawState("open");
-                    robotState = robotStates.LIFT_DUMP;
+                    vertTarget = hardware.vertSlidesSet(1200);
+                    armsTarget = hardware.armsPos("in");
+                    runtime.reset();
+                    robotState = robotStates.LIFT_RETRACT;
+
                 }
                 break;
             case LIFT_DUMP:
-                if (runtime.milliseconds() > 750) {
+                if (runtime.milliseconds() > 500) {
                     armsTarget = hardware.armsPos("in");
                     runtime.reset();
                     robotState = robotStates.LIFT_RETRACT;

@@ -23,13 +23,62 @@ public class AutonLeft extends LinearOpMode {
         robot.initDrive(this);
         waitForStart();
         if(opModeIsActive()){
+            robot.clawState("closed");
+            robot.actions();
             robot.autoMovement(20,0,0,1);
             sleep(100);
-            robot.autoMovement(0,-23.5,0,0.5); //go to net zone
+            robot.autoMovement(0,-28,0,0.5); //go to net zone
             sleep(100);
-            robot.autoMovement(0,0,20,0.5); // orient to bucket + first sampple
+            robot.autoMovement(0,0,32,0.5); // orient to bucket + first sampple
             sleep(100);
-            //robotState
+            robot.vertSlidesSet(robot.top);
+            robot.actions();
+            while(robot.lift1.getCurrentPosition() < robot.top-10);
+            sleep(250);
+            robot.armsPos("out");
+            robot.actions();
+            sleep(1500);
+            robot.clawState("open");
+            robot.actions();
+            sleep(500);
+            robot.armsPos("in");
+            robot.actions();
+            sleep(500);
+            robot.vertSlidesSet(0);
+            robot.actions();
+            /*
+            robot.horiSlidesSet(robot.horiMax);
+            robot.actions();
+            sleep(250);
+            while(runtime.seconds()>7.5&&!robot.colorThreshold() && opModeIsActive()){
+                robot.intakePosSet(false);
+                robot.intakePowerSet(true,true);
+                robot.intakePower = 0.75;
+                robot.actions();
+            }
+            robot.horiSlidesSet(0);
+            while(robot.horizontal.getCurrentPosition() > 10);
+            robot.intakePosSet(true);
+            sleep(250);
+            robot.intakePowerSet(true,true);
+            sleep(1500);
+            robot.clawState("closed");
+            robot.vertSlidesSet(robot.top);
+            robot.actions();
+            sleep(250);
+            robot.armsPos("out");
+            robot.actions();
+            sleep(500);
+            robot.clawState("open");
+            robot.actions();
+            sleep(250);
+            robot.armsPos("in");
+            robot.actions();
+            sleep(250);
+            robot.vertSlidesSet(0);
+
+
+
             robot.autoMovement(6,0,0,0.5);
             sleep(100);
             runtime.reset();
@@ -43,6 +92,7 @@ public class AutonLeft extends LinearOpMode {
             sleep(100);
             robot.autoMovement(0,0,18.5,0.5);
             sleep(100);
+            */
 
         }
     }
