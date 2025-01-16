@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -25,13 +25,14 @@ public class Onbot_HardwareITD {
     // SENSORS
 
     // MOTOR DECLARATIONS - MOVEMENT
-    public DcMotor frontLeft = null;
-    public DcMotor frontRight = null;
-    public DcMotor backLeft = null;
-    public DcMotor backRight = null;
+    public DcMotorEx frontLeft = null;
+    public DcMotorEx frontRight = null;
+    public DcMotorEx backLeft = null;
+    public DcMotorEx backRight = null;
 
     // MOTOR DECLARATIONS - SUBSYSTEMS
     public DcMotorEx lift1 = null;
+    public DcMotorEx lift2 = null;
     public DcMotorEx intake = null;
     public DcMotorEx horizontal = null;
 
@@ -51,8 +52,9 @@ public class Onbot_HardwareITD {
     public static double WHEEL_DIAMETER_INCHES = 3.77953;     // For figuring circumference
     public static double ROBOT_DIAMETER_INCHES = 20.0;
     public static double ROBOT_CIRCUMFERENCE = ROBOT_DIAMETER_INCHES * Math.PI;
+    public static double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER_INCHES * Math.PI;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
+            WHEEL_CIRCUMFERENCE;
 
     // MOTOR POSITIONS
 
@@ -60,20 +62,18 @@ public class Onbot_HardwareITD {
     public final int mid = 2000;
 
     public final int horiMax = 4700;
-    public final int horiInSub = 1250; //some tick number to where the intake would be considered inside of the submersible
+    public final int horiInSub = 2000; //some tick number to where the intake would be considered inside of the submersible
 
     public double intakePower =0;
 
     // SERVO POSITIONS
-    public final double claw_open = 0.66;
-    public final double claw_closed = 0.1;
-    public final double arms_out = 0.629;
-    public final double arms_in = 0.5;
+    public final double claw_open = 0.66; // Value might need changing
+    public final double claw_closed = 0.3; // Value might need changing
+    public final double arms_out = 0.629; // Value might need changing
+    public final double arms_in = 0.45; // Value might need changing
     public final double intakeFlip_down = 0.34;
-    public final double intakeFlip_up = 0.445;
+    public final double intakeFlip_up = 0.433;
     public final double intakeFlip2_offset = 0.095;
-    public final double AUTO_ARM_START = 0.55;
-    public final double TIGHTER_CLAW_CLOSED = 0.1;
 
     // CURRENT POSITIONS
     public int vertCurrent = 0;
@@ -107,87 +107,12 @@ public class Onbot_HardwareITD {
         imu.initialize(parameters);
 
         //motors
-        frontLeft = myOpMode.hardwareMap.get(DcMotor.class, "frontLeft");
-        frontRight = myOpMode.hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = myOpMode.hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = myOpMode.hardwareMap.get(DcMotor.class, "backRight");
-        lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift1");
-        intake = myOpMode.hardwareMap.get(DcMotorEx.class, "intake");
-        horizontal = myOpMode.hardwareMap.get(DcMotorEx.class, "horizontal");
-
-
-        //servos
-        arm1 = myOpMode.hardwareMap.get(Servo.class, "arm1");
-        arm2 = myOpMode.hardwareMap.get(Servo.class, "arm2");
-        claw = myOpMode.hardwareMap.get(Servo.class, "claw");
-        intakeFlip1 = myOpMode.hardwareMap.get(Servo.class, "intakeFlip1");
-        intakeFlip2 = myOpMode.hardwareMap.get(Servo.class, "intakeFlip2");
-        encoderState("reset");
-        encoderState("off");
-
-        color = myOpMode.hardwareMap.get(ColorSensor.class, "color");
-        // BRAKES THE MOTORS
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-
-
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        frontRight.setDirection(DcMotor.Direction.FORWARD);
-        backLeft.setDirection(DcMotor.Direction.REVERSE);
-        backRight.setDirection(DcMotor.Direction.FORWARD);
-
-        lift1.setDirection(DcMotor.Direction.FORWARD);
-        horizontal.setDirection(DcMotor.Direction.FORWARD);
-        intake.setDirection(DcMotor.Direction.FORWARD);
-
-        arm1.setDirection(Servo.Direction.REVERSE);
-        intakeFlip2.setDirection(Servo.Direction.REVERSE);
-
-        horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        lift1.setTargetPosition(0);
-        horizontal.setTargetPosition(0);
-        lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        // MOTOR POWERS
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
-
-        // SERVO INITIALIZE *********************************************************************************************************
-        arm1.setPosition(arms_in);
-        arm2.setPosition(arms_in);
-        claw.setPosition(claw_open);
-        intakeFlip1.setPosition(intakeFlip_current);
-        intakeFlip2.setPosition(intakeFlip_current + intakeFlip2_offset);
-
-        color.enableLed(true);
-
-    }
-
-    public void autoInitDrive(LinearOpMode opMode) {
-        myOpMode = opMode;
-
-        imu = myOpMode.hardwareMap.get(IMU.class, "imu");
-        // Adjust the orientation parameters to match your robot
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
-        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
-        imu.initialize(parameters);
-
-        //motors
         frontLeft = myOpMode.hardwareMap.get(DcMotorEx.class, "frontLeft");
         frontRight = myOpMode.hardwareMap.get(DcMotorEx.class, "frontRight");
         backLeft = myOpMode.hardwareMap.get(DcMotorEx.class, "backLeft");
         backRight = myOpMode.hardwareMap.get(DcMotorEx.class, "backRight");
         lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift1");
+        lift2 = myOpMode.hardwareMap.get(DcMotorEx.class,"lift2");
         intake = myOpMode.hardwareMap.get(DcMotorEx.class, "intake");
         horizontal = myOpMode.hardwareMap.get(DcMotorEx.class, "horizontal");
 
@@ -208,6 +133,7 @@ public class Onbot_HardwareITD {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -216,6 +142,7 @@ public class Onbot_HardwareITD {
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
         lift1.setDirection(DcMotor.Direction.FORWARD);
+        lift2.setDirection(DcMotorSimple.Direction.REVERSE);
         horizontal.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
 
@@ -224,10 +151,13 @@ public class Onbot_HardwareITD {
 
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         lift1.setTargetPosition(0);
+        lift2.setTargetPosition(0);
         horizontal.setTargetPosition(0);
         lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // MOTOR POWERS
@@ -240,19 +170,18 @@ public class Onbot_HardwareITD {
         arm1.setPosition(arms_in);
         arm2.setPosition(arms_in);
         claw.setPosition(claw_open);
+        intakeFlip1.setPosition(intakeFlip_up);
+        intakeFlip2.setPosition(intakeFlip_up + intakeFlip2_offset);
+
         color.enableLed(true);
 
     }
 
-    public void sepIntakeFlip() {
-        intakeFlip1.setPosition(intakeFlip_up);
-        intakeFlip2.setPosition(intakeFlip_up + intakeFlip2_offset);
-    }
-
-    public void autoMovement(double forw, double side, double spin, double power) {
+    public void autoMovement(int forw, double side, double spin, double power) {
         int forwardCount = (int) (forw*COUNTS_PER_INCH);
         int sideCount = (int) (side*COUNTS_PER_INCH);
-        int turnCount = (int) ((spin%360)/180.0*ROBOT_CIRCUMFERENCE * COUNTS_PER_INCH*1.375);
+        spin = (int) ((spin%360)/180.0*ROBOT_CIRCUMFERENCE * COUNTS_PER_INCH*1.375);
+        int turnCount = spin;
 
 
         int frontLeftTarget = frontLeft.getCurrentPosition() + (forwardCount + sideCount + turnCount);
@@ -260,17 +189,18 @@ public class Onbot_HardwareITD {
         int backLeftTarget = backLeft.getCurrentPosition()+ (forwardCount - sideCount + turnCount);
         int backRightTarget = backRight.getCurrentPosition()+ (forwardCount + sideCount - turnCount);
 
-        frontRight.setTargetPosition(frontRightTarget);
-        frontLeft.setTargetPosition(frontLeftTarget);
-        backRight.setTargetPosition(backRightTarget);
-        backLeft.setTargetPosition(backLeftTarget);
+       frontRight.setTargetPosition(frontRightTarget);
+       frontLeft.setTargetPosition(frontLeftTarget);
+       backRight.setTargetPosition(backRightTarget);
+       backLeft.setTargetPosition(backLeftTarget);
 
 
         encoderState("position");
+        double isTurn = spin!=0?0.5:1;
         frontRight.setPower(power);
         frontLeft.setPower(power);
-        backRight.setPower(power*0.5);
-        backLeft.setPower(power*0.5);
+        backRight.setPower(power*isTurn);
+        backLeft.setPower(power*isTurn);
 
         while(frontRight.isBusy() && frontLeft.isBusy() && backRight.isBusy() && backLeft.isBusy());
         encoderState("run");
@@ -297,8 +227,8 @@ public class Onbot_HardwareITD {
         // Set drive motor power levels.
         frontLeft.setPower(FLPow * MAX_POWER);
         frontRight.setPower(FRPow * MAX_POWER);
-        backLeft.setPower(BLPow * MAX_POWER / 2); //front two motors geared 1:2
-        backRight.setPower(BRPow * MAX_POWER / 2);
+        backLeft.setPower(BLPow * MAX_POWER);
+        backRight.setPower(BRPow * MAX_POWER);
 
         while (frontLeft.isBusy() || backLeft.isBusy() || frontRight.isBusy() || backRight.isBusy()) {
         }
@@ -336,7 +266,7 @@ public class Onbot_HardwareITD {
             if (current >= value1) {
                 returnValue = value2;
             } else {
-                returnValue =value1;
+                returnValue = value1;
             }
             intToggle = true;
         } else if (!input) {
@@ -384,25 +314,13 @@ public class Onbot_HardwareITD {
         arm2.setPosition(arms_current);
 
         intakeFlip1.setPosition(intakeFlip_current);
-        intakeFlip2.setPosition(intakeFlip_current + intakeFlip2_offset);
+        intakeFlip1.setPosition(intakeFlip_current + intakeFlip2_offset);
 
         horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         horizontal.setPower(1);
         lift1.setPower(1);
     }
-
-    public void actionsJustForTheLift(){
-        lift1.setTargetPosition(vertCurrent);
-        lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift1.setPower(1);
-    }
-
-    public void actionsJustForArms(double pos) {
-        arm1.setPosition(pos);
-        arm2.setPosition(pos);
-    }
-
     //Manual use of intake
     public void intakePowerManual(boolean direction, boolean on) {
         intakeMode = toggleStrings(direction, "forward","reverse",intakeMode);
@@ -467,7 +385,7 @@ public class Onbot_HardwareITD {
         } else if ((slide < 0.1 && slide > -0.1) && lift1.getTargetPosition() > 0 && lift1.getTargetPosition() < 105) {
             vertCurrent = 0;
         }
-        //vertCurrent = toggleIntegers(top, this.mid - 100, this.top, vertCurrent);
+        vertCurrent = toggleIntegers(top, this.mid - 100, this.top, vertCurrent);
 
         if (reset) {
             vertCurrent = 0;
@@ -493,13 +411,6 @@ public class Onbot_HardwareITD {
             arms_current = arms_out;
         }
         return arms_current;
-    }
-    public double armsPos(double newPos){
-        arms_current = newPos;
-        return arms_current;
-    }
-    public double clawToggle(boolean button){
-        return toggleDoubles(button, claw_open, claw_closed, claw_current);
     }
     public double clawState(String clawPos){
         if (clawPos.equals("open")) {

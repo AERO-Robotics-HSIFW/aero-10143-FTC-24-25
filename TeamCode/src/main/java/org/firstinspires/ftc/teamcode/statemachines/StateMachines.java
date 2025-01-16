@@ -68,6 +68,7 @@ public class StateMachines {
     public void stateAction() {
         // Applying when to set the target position for encoder and servos
         hardware.lift1.setTargetPosition(vertTarget);
+        hardware.lift2.setTargetPosition(vertTarget);
         //this is correct
         hardware.horizontal.setTargetPosition(horiTarget);
 
