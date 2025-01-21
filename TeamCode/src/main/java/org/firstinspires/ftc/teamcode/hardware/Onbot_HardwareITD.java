@@ -181,7 +181,7 @@ public class Onbot_HardwareITD {
         int forwardCount = (int) (forw*COUNTS_PER_INCH);
         int sideCount = (int) (side*COUNTS_PER_INCH);
         spin = (int) ((spin%360)/180.0*ROBOT_CIRCUMFERENCE * COUNTS_PER_INCH*1.375);
-        int turnCount = spin;
+        int turnCount = (int) spin;
 
 
         int frontLeftTarget = frontLeft.getCurrentPosition() + (forwardCount + sideCount + turnCount);
@@ -403,13 +403,17 @@ public class Onbot_HardwareITD {
         claw_current = toggleDoubles(clawButton, claw_open, claw_closed, claw_current);
     }
     //SET POSITIONS
-    public double armsPos(String armPos) {
+    public double armsString(String armPos) {
         //METHOD FOR SET VALUES
         if (armPos.equals("in")) {
             arms_current = arms_in;
         } else if (armPos.equals("out")) {
             arms_current = arms_out;
         }
+        return arms_current;
+    }
+    public double armsPos(double newPos){
+        arms_current = newPos;
         return arms_current;
     }
     public double clawState(String clawPos){

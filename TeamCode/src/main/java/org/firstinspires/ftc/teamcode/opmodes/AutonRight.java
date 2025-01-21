@@ -23,65 +23,9 @@ public class AutonRight extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-            robot = new Onbot_HardwareITD();
-            robotState = new StateMachines(robot);
-
-            robot.autoInitDrive(this);
-            waitForStart();
-            if(opModeIsActive()){
-
-                robot.vertSlidesSet(800);
-                robot.actionsJustForTheLift();
-                sleep(750);
-
-                robot.actionsJustForArms(0.6725);
-                sleep(1500);
-
-                robot.vertSlidesSet(0);
-                robot.actionsJustForTheLift();
-                sleep(1500);
-
-                robot.sepIntakeFlip();
-                sleep(1000);
-
-                robot.claw.setPosition(robot.claw_closed);
-                sleep(100);
-
-                robot.actionsJustForArms(0.6);
-                sleep(1250);
-
-                robot.autoMovement(0,0,180,0.7);
-                sleep(500);
-
-                robot.autoMovement(0,50,0,0.7);
-                sleep(750);
-
-                robot.autoMovement(-38,0,0,0.7);
-                sleep(1000);
-
-                robot.actionsJustForArms(0.8);
-                sleep(1000);
-
-                robot.actionsJustForArms(0.6725);
-                sleep(200);
-
-                robot.claw.setPosition(robot.claw_open);
-                sleep(1000);
-
-                robot.autoMovement(30,0,0,0.5);
-                sleep(250);
-
-                robot.autoMovement(0,0,180,0.5);
-                sleep(500);
-
-                robot.autoMovement(0,60,0,0.4);
-                sleep(500);
-
-                robot.autoMovement(-7,0,0,0.5);
-                sleep(250);
-                robot.claw.setPosition(robot.claw_closed);
-
-                sleep(10000);
-            }
+        robot = new Onbot_HardwareITD();
+        robotState = new StateMachines(robot);
+        robot.initDrive(this);
+        waitForStart();
     }
 }

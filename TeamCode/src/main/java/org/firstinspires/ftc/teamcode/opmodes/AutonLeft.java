@@ -35,13 +35,13 @@ public class AutonLeft extends LinearOpMode {
             robot.actions();
             while(robot.lift1.getCurrentPosition() < robot.top-10);
             sleep(250);
-            robot.armsPos("out");
+            robot.armsString("out");
             robot.actions();
             sleep(1500);
             robot.clawState("open");
             robot.actions();
             sleep(500);
-            robot.armsPos("in");
+            robot.armsString("in");
             robot.actions();
             sleep(500);
             robot.vertSlidesSet(0);

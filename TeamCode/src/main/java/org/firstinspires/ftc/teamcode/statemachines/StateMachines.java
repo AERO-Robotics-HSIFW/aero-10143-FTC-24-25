@@ -58,7 +58,6 @@ public class StateMachines {
         armsTarget = hardware.arms_in;
         horiTarget = 0;
         vertTarget = 0;
-        clawTarget = hardware.clawState("open");
         intakeFlipTarget = hardware.intakeFlip_up;
     }
 
@@ -86,6 +85,7 @@ public class StateMachines {
         hardware.lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.lift1.setPower(1);
+        hardware.lift2.setPower(1);
         hardware.horizontal.setPower(1);
     }
 
@@ -193,13 +193,13 @@ public class StateMachines {
             case INTAKE_TRANSFER:
                 if(runtime.milliseconds() > 500){
                     intakePower = hardware.intakePowerSet(false,false);
-                    armsTarget = hardware.armsPos("in");
+                    armsTarget = hardware.armsString("in");
                     runtime.reset();
                     robotState = robotStates.LIFT_GRAB;
                 }
                 break;
             case SPECIMEN_INIT:
-                vertTarget =hardware.vertSlidesSet(900);
+                vertTarget = hardware.vertSlidesSet(900);
                 if(runtime.milliseconds() > 500){
                     armsTarget = hardware.armsPos(0.6725);
                     if(runtime.milliseconds() > 1500) {
@@ -221,7 +221,7 @@ public class StateMachines {
 
             case LIFT_EXTEND:
                 if((hardware.lift1.getCurrentPosition() > 1500 && !top) || (hardware.lift1.getCurrentPosition() > 3300 && top)) {
-                    armsTarget = hardware.armsPos("out");
+                    armsTarget = hardware.armsString("out");
                     runtime.reset();
                     robotState=robotStates.ARMS_OUT;
                 }
@@ -244,7 +244,7 @@ public class StateMachines {
                 if(runtime.milliseconds() > 500){
                     clawTarget = hardware.clawState("open");
                     vertTarget = hardware.vertSlidesSet(1200);
-                    armsTarget = hardware.armsPos("in");
+                    armsTarget = hardware.armsString("in");
                     runtime.reset();
                     robotState = robotStates.LIFT_RETRACT;
 
@@ -252,7 +252,7 @@ public class StateMachines {
                 break;
             case LIFT_DUMP:
                 if (runtime.milliseconds() > 500) {
-                    armsTarget = hardware.armsPos("in");
+                    armsTarget = hardware.armsString("in");
                     runtime.reset();
                     robotState = robotStates.LIFT_RETRACT;
 
@@ -299,7 +299,7 @@ public class StateMachines {
                 break;
             case IDLE:
                 clawTarget = hardware.clawState("open");
-                armsTarget = hardware.armsPos("in");
+                armsTarget = hardware.armsString("in");
                 intakeFlipTarget = hardware.intakePosSet(true);
                 intakePower = hardware.intakePowerSet(true, false);
                 if(runtime.milliseconds() > 2000){
