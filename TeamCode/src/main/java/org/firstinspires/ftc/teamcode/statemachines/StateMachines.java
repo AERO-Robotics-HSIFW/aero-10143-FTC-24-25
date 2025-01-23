@@ -80,7 +80,8 @@ public class StateMachines {
         hardware.intakeFlip2.setPosition(intakeFlipTarget + hardware.intakeFlip2_offset);
 
         // Assigning power
-        hardware.intake.setPower(intakePower);
+        hardware.intakeWheel1.setPower(intakePower);
+        hardware.intakeWheel2.setPower(intakePower);
 
         hardware.lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);

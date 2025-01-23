@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -33,7 +34,6 @@ public class Onbot_HardwareITD {
     // MOTOR DECLARATIONS - SUBSYSTEMS
     public DcMotorEx lift1 = null;
     public DcMotorEx lift2 = null;
-    public DcMotorEx intake = null;
     public DcMotorEx horizontal = null;
 
     // SERVOS
@@ -42,6 +42,9 @@ public class Onbot_HardwareITD {
     public Servo arm2 = null;
     public Servo intakeFlip1 = null;
     public Servo intakeFlip2 = null;
+    public CRServo intakeWheel1 = null;
+    public CRServo intakeWheel2 = null;
+    public Servo intakeStopper = null;
 
     public ColorSensor color = null;
     // MOTOR POWERS
@@ -64,16 +67,16 @@ public class Onbot_HardwareITD {
     public final int horiMax = 4700;
     public final int horiInSub = 2000; //some tick number to where the intake would be considered inside of the submersible
 
-    public double intakePower =0;
+    public double intakePower = 0;
 
     // SERVO POSITIONS
     public final double claw_open = 0.66; // Value might need changing
     public final double claw_closed = 0.3; // Value might need changing
     public final double arms_out = 0.629; // Value might need changing
     public final double arms_in = 0.45; // Value might need changing
-    public final double intakeFlip_down = 0.34;
-    public final double intakeFlip_up = 0.433;
-    public final double intakeFlip2_offset = 0.095;
+    public final double intakeFlip_down = 0.34; // Value will 100% need changing
+    public final double intakeFlip_up = 0.433; // Value will 100% need changing
+    public final double intakeFlip2_offset = 0.095; // Value will 100% need changing
 
     // CURRENT POSITIONS
     public int vertCurrent = 0;
@@ -113,7 +116,6 @@ public class Onbot_HardwareITD {
         backRight = myOpMode.hardwareMap.get(DcMotorEx.class, "backRight");
         lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift1");
         lift2 = myOpMode.hardwareMap.get(DcMotorEx.class,"lift2");
-        intake = myOpMode.hardwareMap.get(DcMotorEx.class, "intake");
         horizontal = myOpMode.hardwareMap.get(DcMotorEx.class, "horizontal");
 
 
@@ -123,6 +125,10 @@ public class Onbot_HardwareITD {
         claw = myOpMode.hardwareMap.get(Servo.class, "claw");
         intakeFlip1 = myOpMode.hardwareMap.get(Servo.class, "intakeFlip1");
         intakeFlip2 = myOpMode.hardwareMap.get(Servo.class, "intakeFlip2");
+        intakeWheel1 = myOpMode.hardwareMap.get(CRServo.class,"servoWheel1");
+        intakeWheel2 = myOpMode.hardwareMap.get(CRServo.class,"servoWheel2");
+        intakeStopper = myOpMode.hardwareMap.get(Servo.class,"intakeStopper");
+
         encoderState("reset");
         encoderState("off");
 
@@ -144,7 +150,6 @@ public class Onbot_HardwareITD {
         lift1.setDirection(DcMotor.Direction.FORWARD);
         lift2.setDirection(DcMotorSimple.Direction.REVERSE);
         horizontal.setDirection(DcMotor.Direction.FORWARD);
-        intake.setDirection(DcMotor.Direction.FORWARD);
 
         arm1.setDirection(Servo.Direction.REVERSE);
         intakeFlip2.setDirection(Servo.Direction.REVERSE);
@@ -305,8 +310,6 @@ public class Onbot_HardwareITD {
     }
 
     public void actions(){
-        intake.setPower(intakePower);
-
         horizontal.setTargetPosition(horiCurrent);
         lift1.setTargetPosition(vertCurrent);
 
@@ -320,6 +323,8 @@ public class Onbot_HardwareITD {
         lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         horizontal.setPower(1);
         lift1.setPower(1);
+        intakeWheel1.setPower(intakePower);
+        intakeWheel2.setPower(intakePower);
     }
     //Manual use of intake
     public void intakePowerManual(boolean direction, boolean on) {
@@ -377,7 +382,6 @@ public class Onbot_HardwareITD {
     }
 
     public int liftMan(double slide, boolean top, boolean reset) {
-
         if (slide > 0.1 && lift1.getTargetPosition() + 50 < this.top && Math.abs(lift1.getTargetPosition() - lift1.getCurrentPosition()) < 350) {
             vertCurrent += 50;
         } else if (slide < -0.1 && lift1.getTargetPosition() - 25 > 0 && Math.abs(lift1.getTargetPosition() - lift1.getCurrentPosition()) < 350) {
