@@ -21,7 +21,6 @@ public class Onbot_HardwareITD {
     // ACCESS INSTRUMENTS OF HUB
     public IMU imu;
     Orientation angle;
-    double botHeading;
 
     // SENSORS
 
@@ -44,8 +43,6 @@ public class Onbot_HardwareITD {
     public Servo intakeFlip2 = null;
     public CRServo intakeWheel1 = null;
     public CRServo intakeWheel2 = null;
-    public Servo intakeStopper = null;
-
     public ColorSensor color = null;
     // MOTOR POWERS
     public static double MAX_POWER = 1;
@@ -127,7 +124,6 @@ public class Onbot_HardwareITD {
         intakeFlip2 = myOpMode.hardwareMap.get(Servo.class, "intakeFlip2");
         intakeWheel1 = myOpMode.hardwareMap.get(CRServo.class,"servoWheel1");
         intakeWheel2 = myOpMode.hardwareMap.get(CRServo.class,"servoWheel2");
-        intakeStopper = myOpMode.hardwareMap.get(Servo.class,"intakeStopper");
 
         encoderState("reset");
         encoderState("off");
