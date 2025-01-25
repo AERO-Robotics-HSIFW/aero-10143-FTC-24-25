@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.*;
 import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
 import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
@@ -35,13 +34,13 @@ public class AutonLeft extends LinearOpMode {
             robot.actions();
             while(robot.lift1.getCurrentPosition() < robot.top-10);
             sleep(250);
-            robot.armsString("out");
+            robot.armsPos("out");
             robot.actions();
             sleep(1500);
             robot.clawState("open");
             robot.actions();
             sleep(500);
-            robot.armsString("in");
+            robot.armsPos("in");
             robot.actions();
             sleep(500);
             robot.vertSlidesSet(0);

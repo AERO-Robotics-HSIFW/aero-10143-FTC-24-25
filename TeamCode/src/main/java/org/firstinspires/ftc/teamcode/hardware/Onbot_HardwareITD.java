@@ -58,22 +58,23 @@ public class Onbot_HardwareITD {
 
     // MOTOR POSITIONS
 
-    public final int top = 3800;
-    public final int mid = 2000;
+    public final int top = 3000;
+    public final int mid = 1750;
 
-    public final int horiMax = 4700;
-    public final int horiInSub = 2000; //some tick number to where the intake would be considered inside of the submersible
+    public final int horiMax = 1800;
+    public final int horiInSub = 500; //some tick number to where the intake would be considered inside of the submersible
 
     public double intakePower = 0;
 
     // SERVO POSITIONS
-    public final double claw_open = 0.66; // Value might need changing
-    public final double claw_closed = 0.3; // Value might need changing
-    public final double arms_out = 0.629; // Value might need changing
-    public final double arms_in = 0.45; // Value might need changing
-    public final double intakeFlip_down = 0.34; // Value will 100% need changing
-    public final double intakeFlip_up = 0.433; // Value will 100% need changing
-    public final double intakeFlip2_offset = 0.095; // Value will 100% need changing
+    public final double claw_open = 0.51; // Value might need changing
+    public final double claw_closed = 0.415; // Value might need changing
+    public final double arms_out_SAMP = 0.8; // Value might need changing
+    public final double arms_in = 0.16; // Value might need changing
+    public final double arms_out_SPEC = 1;
+    public final double intakeFlip_down = 0.56; // Value will 100% need changing
+    public final double intakeFlip_up = 0.4722; // Value will 100% need changing
+    public final double intakeFlip2_offset = 0; // Value will 100% need changing
 
     // CURRENT POSITIONS
     public int vertCurrent = 0;
@@ -143,9 +144,10 @@ public class Onbot_HardwareITD {
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
-        lift1.setDirection(DcMotor.Direction.FORWARD);
-        lift2.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift1.setDirection(DcMotor.Direction.REVERSE);
+        lift2.setDirection(DcMotorSimple.Direction.FORWARD);
         horizontal.setDirection(DcMotor.Direction.FORWARD);
+        intakeWheel1.setDirection(DcMotor.Direction.REVERSE);
 
         arm1.setDirection(Servo.Direction.REVERSE);
         intakeFlip2.setDirection(Servo.Direction.REVERSE);
@@ -172,17 +174,18 @@ public class Onbot_HardwareITD {
         arm2.setPosition(arms_in);
         claw.setPosition(claw_open);
         intakeFlip1.setPosition(intakeFlip_up);
-        intakeFlip2.setPosition(intakeFlip_up + intakeFlip2_offset);
+        intakeFlip2.setPosition(intakeFlip_up);
+
 
         color.enableLed(true);
 
     }
 
-    public void autoMovement(int forw, double side, double spin, double power) {
+    public void autoMovement(int forw, double side, int spin, double power) {
         int forwardCount = (int) (forw*COUNTS_PER_INCH);
         int sideCount = (int) (side*COUNTS_PER_INCH);
         spin = (int) ((spin%360)/180.0*ROBOT_CIRCUMFERENCE * COUNTS_PER_INCH*1.375);
-        int turnCount = (int) spin;
+        int turnCount = spin;
 
 
         int frontLeftTarget = frontLeft.getCurrentPosition() + (forwardCount + sideCount + turnCount);
@@ -313,12 +316,14 @@ public class Onbot_HardwareITD {
         arm2.setPosition(arms_current);
 
         intakeFlip1.setPosition(intakeFlip_current);
-        intakeFlip1.setPosition(intakeFlip_current + intakeFlip2_offset);
+        intakeFlip2.setPosition(intakeFlip_current + intakeFlip2_offset);
 
         horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         horizontal.setPower(1);
         lift1.setPower(1);
+        lift2.setPower(2);
         intakeWheel1.setPower(intakePower);
         intakeWheel2.setPower(intakePower);
     }
@@ -399,16 +404,23 @@ public class Onbot_HardwareITD {
 
     //MANUAL
     public void armsMan(boolean armPos, boolean clawButton) {
-        arms_current = toggleDoubles(armPos, arms_in, arms_out, arms_current);
+        arms_current = toggleDoubles(armPos, arms_in, arms_out_SAMP, arms_current);
         claw_current = toggleDoubles(clawButton, claw_open, claw_closed, claw_current);
     }
+    public double armsIncrement(double newPos){
+        arms_current = newPos;
+        return arms_current;
+    }
     //SET POSITIONS
-    public double armsString(String armPos) {
+    public double armsPos(String armPos) {
         //METHOD FOR SET VALUES
         if (armPos.equals("in")) {
             arms_current = arms_in;
-        } else if (armPos.equals("out")) {
-            arms_current = arms_out;
+        } else if (armPos.equals("out_samp")) {
+            arms_current = arms_out_SAMP;
+        }
+        else if(armPos.equals("out_spec")){
+            arms_current = arms_out_SPEC;
         }
         return arms_current;
     }
@@ -438,7 +450,7 @@ public class Onbot_HardwareITD {
         return returnValue;
     }
     public boolean colorThreshold(){
-        int threshold = 300;
+        int threshold = 600;
         return color.red() > threshold || color.green() > threshold || color.blue() > threshold;
     }
     public double intake(char largestColor, String teamColor){
