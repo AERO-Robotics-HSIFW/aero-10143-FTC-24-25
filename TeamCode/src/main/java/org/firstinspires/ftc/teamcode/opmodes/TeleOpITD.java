@@ -62,12 +62,23 @@ public class TeleOpITD extends LinearOpMode {
             states.inputTranslation(gamepad1,gamepad2);
             states.stateMachineLogic();
             states.stateAction();
-            robot.roboCentric(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            if(gamepad1.x){
+                robot.roboCentric(-gamepad1.left_stick_y/2, gamepad1.left_stick_x/2, gamepad1.right_stick_x/2);
+            }
+            else{
+                robot.roboCentric(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            }
+
             states.teamColor = robot.toggleStrings(gamepad2.left_trigger > 0.75, "red", "blue", states.teamColor);
             telemetry.addData("Team Color:", states.teamColor.toUpperCase());
             telemetry.addData("Horizontal Ticks:", robot.horizontal.getTargetPosition());
             telemetry.addData("Vertical Ticks:", robot.lift1.getTargetPosition());
             telemetry.addData("CURRENT STATE:", states.robotState);
+            telemetry.addData("RED", robot.color.red());
+            telemetry.addData("RED", robot.color.green());
+            telemetry.addData("RED", robot.color.blue());
+            telemetry.addData("CLAW POS D", robot.claw_current);
+            telemetry.addData("CLAW POS A", robot.claw.getPosition());
             telemetry.update();
         }
     }

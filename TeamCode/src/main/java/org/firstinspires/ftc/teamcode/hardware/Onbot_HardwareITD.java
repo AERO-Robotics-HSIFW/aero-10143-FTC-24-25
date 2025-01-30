@@ -61,7 +61,7 @@ public class Onbot_HardwareITD {
     public final int top = 3000;
     public final int mid = 1750;
 
-    public final int horiMax = 1800;
+    public final int horiMax = 1500;
     public final int horiInSub = 500; //some tick number to where the intake would be considered inside of the submersible
 
     public double intakePower = 0;
@@ -72,8 +72,8 @@ public class Onbot_HardwareITD {
     public final double arms_out_SAMP = 0.8; // Value might need changing
     public final double arms_in = 0.16; // Value might need changing
     public final double arms_out_SPEC = 1;
-    public final double intakeFlip_down = 0.56; // Value will 100% need changing
-    public final double intakeFlip_up = 0.4722; // Value will 100% need changing
+    public final double intakeFlip_down = 0.53; // Value will 100% need changing
+    public final double intakeFlip_up = 0.43; // Value will 100% need changing
     public final double intakeFlip2_offset = 0; // Value will 100% need changing
 
     // CURRENT POSITIONS
@@ -149,7 +149,7 @@ public class Onbot_HardwareITD {
         horizontal.setDirection(DcMotor.Direction.FORWARD);
         intakeWheel1.setDirection(DcMotor.Direction.REVERSE);
 
-        arm1.setDirection(Servo.Direction.REVERSE);
+        arm2.setDirection(Servo.Direction.REVERSE);
         intakeFlip2.setDirection(Servo.Direction.REVERSE);
 
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -317,7 +317,7 @@ public class Onbot_HardwareITD {
 
         intakeFlip1.setPosition(intakeFlip_current);
         intakeFlip2.setPosition(intakeFlip_current + intakeFlip2_offset);
-
+        claw.setPosition(claw_current);
         horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
