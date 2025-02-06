@@ -10,7 +10,7 @@ public class StateMachines {
     public enum robotStates {
         IDLE,
         SPECIMEN_INIT,
-        SPECIMEN_GRAB,
+        SPECIMEN_GRAB, 
         SPECIMEN_RELEASE,
         LIFT_EXTEND,
         LIFT_GRAB,

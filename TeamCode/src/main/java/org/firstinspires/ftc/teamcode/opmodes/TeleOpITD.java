@@ -40,7 +40,7 @@ import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
  * or add a @Disabled annotation to prevent this OpMode from being added to the Driver Station
  */
 @TeleOp(name="MainCode", group= "Linear OpMode")
-public class TeleOpITD extends LinearOpMode {
+    public class TeleOpITD extends LinearOpMode {
 
 
     ElapsedTime runtime = new ElapsedTime();
