@@ -89,6 +89,7 @@ public class HardwareITD {
     private boolean intToggle = false;
     private boolean doubleToggle = false;
     private boolean stringToggle = false;
+    private boolean booleanToggle = false;
     private String intakeMode = "forward";
 
 
@@ -273,6 +274,20 @@ public class HardwareITD {
             intToggle = true;
         } else if (!input) {
             intToggle = false;
+        }
+        return returnValue;
+    }
+    public boolean toggleBooleans(boolean input, boolean value1, boolean value2, boolean current){
+        boolean returnValue = current;
+        if (input && !booleanToggle) {
+            if (current == value1) {
+                returnValue = value2;
+            } else {
+                returnValue = value1;
+            }
+            booleanToggle = true;
+        } else if (!input) {
+            booleanToggle = false;
         }
         return returnValue;
     }

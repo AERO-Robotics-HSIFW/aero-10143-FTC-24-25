@@ -97,10 +97,16 @@ public class StateMachines {
         boolean armsReady = (robotState.equals(robotStates.ARMS_OUT) || robotState.equals(robotStates.INTAKE_START) || robotState.equals(robotStates.LIFT_GRAB));
         //GAMEPAD1 INPUTS
             //StateTranslations
+
         if (gamepad1.a && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = hardware.top;
             top = true;
             robotState = robotStates.LIFT_EXTEND;
+        }
+        if(gamepad1.right_bumper && robotState.equals(robotStates.ARMS_OUT)) {
+            clawTarget = hardware.clawState(true);
+            runtime.reset();
+            robotState = robotStates.LIFT_DUMP;
         }
         if(gamepad1.right_trigger > 0.5&& armsReady){
             armsTarget = hardware.armsPos(armsTarget+0.001);
@@ -108,8 +114,8 @@ public class StateMachines {
         else if(gamepad1.left_trigger > 0.5 && armsReady){
             armsTarget = hardware.armsPos(armsTarget-0.001);
         }
-        if(armsReady {
-            clawTarget = hardware.clawState(hardware.toggle);
+        if(armsReady){
+            clawTarget = hardware.clawState(hardware.toggleBooleans(gamepad1.right_bumper, true, false, clawTarget == hardware.claw_open));
         }
         if(gamepad1.dpad_up&&armsReady){
             vertTarget = hardware.liftMan(0.5, false,false);
@@ -246,11 +252,7 @@ public class StateMachines {
                 break;
 
             case ARMS_OUT:
-                if(gamepad1.right_bumper) {
-                    clawTarget = hardware.clawState(true);
-                    runtime.reset();
-                    robotState = robotStates.LIFT_DUMP;
-                }
+                //look at input translation
                 break;
 
             case SPECIMEN_RELEASE:
@@ -283,7 +285,7 @@ public class StateMachines {
             case MANUAL:
 
 
-                //GAMEPAD 1 MANUAL
+                /*GAMEPAD 1 MANUAL
                 boolean armsReady = (prevState.equals(robotStates.ARMS_OUT) || prevState.equals(robotStates.INTAKE_START) || prevState.equals(robotStates.LIFT_GRAB));
 
                 if(gamepad1.right_trigger > 0.5&& armsReady){
@@ -321,6 +323,7 @@ public class StateMachines {
                 }
                 horiTarget = hardware.horiSlidesMan(-gamepad2.left_stick_y);
                 // program manual slide control + claaw
+                 */
                 robotState = prevState;
                 break;
 
