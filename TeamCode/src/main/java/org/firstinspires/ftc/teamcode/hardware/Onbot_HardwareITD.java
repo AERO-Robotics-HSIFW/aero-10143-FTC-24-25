@@ -15,6 +15,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Onbot_HardwareITD {
 
+    private final double ODOM_INCHES_PER_COUNT = 0.000495;
+    public DcMotor driveOdo;
+    public DcMotor strafeOdo;
+    public double driveDistance;
+    public double strafeDistance;
+    private int rawDriveOdo = 0;
+    private int rawStrafeOdo = 0;
+
     // DEFINE OPMORE MEMBERS
     private LinearOpMode myOpMode;
 
@@ -115,6 +123,10 @@ public class Onbot_HardwareITD {
         lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift1");
         lift2 = myOpMode.hardwareMap.get(DcMotorEx.class,"lift2");
         horizontal = myOpMode.hardwareMap.get(DcMotorEx.class, "horizontal");
+
+        // Odom wheels
+        driveOdo = myOpMode.hardwareMap.get(DcMotor.class,"axial");
+        strafeOdo = myOpMode.hardwareMap.get(DcMotor.class,"lateral");
 
 
         //servos
@@ -239,6 +251,25 @@ public class Onbot_HardwareITD {
 
     }
 
+    public boolean readOdometry() {
+        rawDriveOdo = driveOdo.getCurrentPosition();
+        rawStrafeOdo = strafeOdo.getCurrentPosition();
+
+        driveDistance = rawDriveOdo * ODOM_INCHES_PER_COUNT;
+        strafeDistance = rawStrafeOdo * ODOM_INCHES_PER_COUNT;
+
+        return true; // So the function can be used in while loops :D
+
+    }
+
+    public void resetOdometry() {
+        readOdometry();
+        driveDistance = 0;
+
+        strafeDistance = 0;
+
+    }
+
     public void encoderState(String a) {
         if (a.equals("reset")) {
             frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -323,7 +354,7 @@ public class Onbot_HardwareITD {
         lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         horizontal.setPower(1);
         lift1.setPower(1);
-        lift2.setPower(2);
+        lift2.setPower(1);
         intakeWheel1.setPower(intakePower);
         intakeWheel2.setPower(intakePower);
     }

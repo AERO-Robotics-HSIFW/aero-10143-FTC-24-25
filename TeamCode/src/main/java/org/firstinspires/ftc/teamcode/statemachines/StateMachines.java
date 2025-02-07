@@ -79,7 +79,7 @@ public class StateMachines {
         hardware.intakeFlip1.setPosition(intakeFlipTarget);
         hardware.intakeFlip2.setPosition(intakeFlipTarget + hardware.intakeFlip2_offset);
 
-        // Assigning power
+        // Assigning power skibidi toilet
         hardware.intakeWheel1.setPower(intakePower);
         hardware.intakeWheel2.setPower(intakePower);
 
@@ -301,7 +301,7 @@ public class StateMachines {
                     vertTarget = hardware.liftMan(-0.5,false,false);
                 }
 
-                // program manual slide control + claaw
+                // program manual slide control + claw
                 robotState = prevState;
                 break;
             case IDLE:
