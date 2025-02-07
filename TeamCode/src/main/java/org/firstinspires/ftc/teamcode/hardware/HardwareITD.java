@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
-public class Onbot_HardwareITD {
+public class HardwareITD {
 
     // DEFINE OPMORE MEMBERS
     private LinearOpMode myOpMode;
@@ -34,6 +33,7 @@ public class Onbot_HardwareITD {
     public DcMotorEx lift1 = null;
     public DcMotorEx lift2 = null;
     public DcMotorEx horizontal = null;
+    public DcMotor intake = null;
 
     // SERVOS
     public Servo claw = null;
@@ -41,8 +41,6 @@ public class Onbot_HardwareITD {
     public Servo arm2 = null;
     public Servo intakeFlip1 = null;
     public Servo intakeFlip2 = null;
-    public CRServo intakeWheel1 = null;
-    public CRServo intakeWheel2 = null;
     public ColorSensor color = null;
     // MOTOR POWERS
     public static double MAX_POWER = 1;
@@ -55,6 +53,7 @@ public class Onbot_HardwareITD {
     public static double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER_INCHES * Math.PI;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             WHEEL_CIRCUMFERENCE;
+    public final double inRobot = 1; //testing required for this
 
     // MOTOR POSITIONS
 
@@ -115,6 +114,7 @@ public class Onbot_HardwareITD {
         lift1 = myOpMode.hardwareMap.get(DcMotorEx.class, "lift1");
         lift2 = myOpMode.hardwareMap.get(DcMotorEx.class,"lift2");
         horizontal = myOpMode.hardwareMap.get(DcMotorEx.class, "horizontal");
+        intake = myOpMode.hardwareMap.get(DcMotor.class, "intake");
 
 
         //servos
@@ -123,8 +123,7 @@ public class Onbot_HardwareITD {
         claw = myOpMode.hardwareMap.get(Servo.class, "claw");
         intakeFlip1 = myOpMode.hardwareMap.get(Servo.class, "intakeFlip1");
         intakeFlip2 = myOpMode.hardwareMap.get(Servo.class, "intakeFlip2");
-        intakeWheel1 = myOpMode.hardwareMap.get(CRServo.class,"servoWheel1");
-        intakeWheel2 = myOpMode.hardwareMap.get(CRServo.class,"servoWheel2");
+
 
         encoderState("reset");
         encoderState("off");
@@ -147,7 +146,6 @@ public class Onbot_HardwareITD {
         lift1.setDirection(DcMotor.Direction.REVERSE);
         lift2.setDirection(DcMotorSimple.Direction.FORWARD);
         horizontal.setDirection(DcMotor.Direction.FORWARD);
-        intakeWheel1.setDirection(DcMotor.Direction.REVERSE);
 
         arm2.setDirection(Servo.Direction.REVERSE);
         intakeFlip2.setDirection(Servo.Direction.REVERSE);
@@ -324,8 +322,7 @@ public class Onbot_HardwareITD {
         horizontal.setPower(1);
         lift1.setPower(1);
         lift2.setPower(2);
-        intakeWheel1.setPower(intakePower);
-        intakeWheel2.setPower(intakePower);
+        intake.setPower(intakePower);
     }
     //Manual use of intake
     public void intakePowerManual(boolean direction, boolean on) {
@@ -337,7 +334,7 @@ public class Onbot_HardwareITD {
     //Set directions for intake
     public double intakePowerSet(boolean on, boolean inRobot) {
         if(on){
-            intakePower = inRobot?1:-1; //inRobot signifies whether intake will be bringing samples into the robot
+            intakePower = inRobot?this.inRobot:-this.inRobot; //inRobot signifies whether intake will be bringing samples into the robot
         }
         else{
             intakePower = 0;
@@ -428,10 +425,10 @@ public class Onbot_HardwareITD {
         arms_current = newPos;
         return arms_current;
     }
-    public double clawState(String clawPos){
-        if (clawPos.equals("open")) {
+    public double clawState(boolean open){
+        if (open) {
             claw_current = claw_open;
-        } else if (clawPos.equals("closed")) {
+        } else{
             claw_current = claw_closed;
         }
         return claw_current;

@@ -20,11 +20,8 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
+import org.firstinspires.ftc.teamcode.hardware.HardwareITD;
 import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
 
 /**
@@ -44,7 +41,7 @@ public class TeleOpITD extends LinearOpMode {
 
 
     ElapsedTime runtime = new ElapsedTime();
-    Onbot_HardwareITD robot = new Onbot_HardwareITD();
+    HardwareITD robot = new HardwareITD();
     StateMachines states = new StateMachines(robot);
 
     @Override

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
+import org.firstinspires.ftc.teamcode.hardware.HardwareITD;
 
 public class StateMachines {
     public enum robotStates {
@@ -32,7 +32,7 @@ public class StateMachines {
     the term "forward" means that it is going out of the robot
     (That is for intake when looking in the hardware class)
     */
-    Onbot_HardwareITD hardware = null;
+    HardwareITD hardware = null;
     public robotStates robotState = robotStates.INTAKE_START;
     ElapsedTime runtime;
     public int vertTarget;
@@ -52,7 +52,7 @@ public class StateMachines {
     public String teamColor = "red";
     public char largestColor = ' ';
     // Constructor initializing
-    public StateMachines(Onbot_HardwareITD robot) {
+    public StateMachines(HardwareITD robot) {
         hardware = robot;
         runtime = new ElapsedTime();
         armsTarget = hardware.arms_in;
@@ -80,8 +80,7 @@ public class StateMachines {
         hardware.intakeFlip2.setPosition(intakeFlipTarget + hardware.intakeFlip2_offset);
 
         // Assigning power
-        hardware.intakeWheel1.setPower(intakePower);
-        hardware.intakeWheel2.setPower(intakePower);
+        hardware.intake.setPower(intakePower);
 
         hardware.lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -95,38 +94,49 @@ public class StateMachines {
     public void inputTranslation(Gamepad input1, Gamepad input2) {
         gamepad1 = input1;
         gamepad2 = input2;
-        boolean manual2 = (gamepad2.left_stick_y > 0.1 || gamepad2.left_stick_y < -0.1 || gamepad2.dpad_right || gamepad2.dpad_left || gamepad2.b || gamepad2.dpad_up);
-        boolean manual1 = (gamepad1.left_trigger > 0.5 || gamepad1.right_trigger > 0.5 || gamepad1.b || gamepad1.a || gamepad1.dpad_left || gamepad1.dpad_right || gamepad1.y || gamepad1.left_bumper);
-        if (gamepad2.x) {
-            robotState = robotStates.INTAKE_START;
-        } else if (gamepad2.left_bumper) {
-            robotState = robotStates.INTAKE_IN;
-        } else if (gamepad2.right_bumper) {
-            robotState = robotStates.INTAKE_RETRACT;
-        } else if (gamepad1.dpad_up && robotState.equals(robotStates.LIFT_GRAB)) {
+        boolean armsReady = (robotState.equals(robotStates.ARMS_OUT) || robotState.equals(robotStates.INTAKE_START) || robotState.equals(robotStates.LIFT_GRAB));
+        //GAMEPAD1 INPUTS
+            //StateTranslations
+        if (gamepad1.a && robotState.equals(robotStates.LIFT_GRAB)) {
             vertTarget = hardware.top;
             top = true;
             robotState = robotStates.LIFT_EXTEND;
-
-        } /*else if (gamepad1.dpad_down && robotState.equals(robotStates.LIFT_GRAB)) {
-            vertTarget = 2000;
-            top = false;
-            robotState = robotStates.LIFT_EXTEND;
-        }*/ else if (gamepad1.a) {
-            //robotState = robotStates.LIFT_RETRACT;
-        }else if (gamepad2.right_trigger > 0.9) {
-            runtime.reset();
-            robotState = robotStates.IDLE;
-        } else if (gamepad1.y && robotState.equals(robotStates.LIFT_GRAB) && false) {
-            robotState = robotStates.SPECIMEN_INIT;
-        } else if (gamepad1.left_bumper && robotState.equals(robotStates.SPECIMEN_INIT)){
-            robotState = robotStates.ARMS_OUT;
+        }
+        if(gamepad1.right_trigger > 0.5&& armsReady){
+            armsTarget = hardware.armsPos(armsTarget+0.001);
+        }
+        else if(gamepad1.left_trigger > 0.5 && armsReady){
+            armsTarget = hardware.armsPos(armsTarget-0.001);
+        }
+        if(armsReady {
+            clawTarget = hardware.clawState(hardware.toggle);
+        }
+        if(gamepad1.dpad_up&&armsReady){
+            vertTarget = hardware.liftMan(0.5, false,false);
+        }
+        else if(gamepad1.dpad_down&&armsReady){
+            vertTarget = hardware.liftMan(-0.5,false,false);
         }
 
-        if(manual1 || manual2){
-            prevState = robotState; //if it runs again prevState will never be set to manual
-            robotState =  robotStates.MANUAL;
+
+        //GAMEPAD2 INPUTS
+            //StateTranslations
+        if (gamepad2.dpad_down) {
+            robotState = robotStates.INTAKE_START;
         }
+        if(gamepad2.dpad_right){ //dpad_right OUT robot
+            intakeFlipTarget = hardware.intakePosSet(true);
+            intakePower = hardware.intakePowerSet(true, false);
+        }
+        if(gamepad2.dpad_left){ //dpad_left INTO robot
+            intakeFlipTarget = hardware.intakePosSet(false);
+            intakePower = hardware.intakePowerSet(true,true);
+        }
+        else if(gamepad2.dpad_down){//dpad_down intake OFF + UP
+            intakeFlipTarget = hardware.intakePosSet(true);
+            intakePower = hardware.intakePowerSet(false,false);
+        }
+        horiTarget = hardware.horiSlidesMan(-gamepad2.left_stick_y);
 
     }
 
@@ -138,8 +148,6 @@ public class StateMachines {
                 clawTarget = hardware.claw_open;
                 break;
             case INTAKE_EXTEND:
-                //intakeFlipTarget = hardware.intakePosSet(horiTarget < hardware.horiInSub);
-                intakeFlipTarget = hardware.intakePosSet(true);
                 if(hardware.colorThreshold()){
                     runtime.reset();
                     intakeFlipTarget = hardware.intakePosSet(true);
@@ -167,7 +175,7 @@ public class StateMachines {
                 break;
             case INTAKE_IN:
                 hardware.intakePower = 0;
-                clawTarget = hardware.clawState("open");
+                clawTarget = hardware.clawState(true);
                 intakePower = hardware.intakePower;
                 robotState = robotStates.INTAKE_EXTEND;
                 break;
@@ -197,7 +205,7 @@ public class StateMachines {
 
             case INTAKE_TRANSFER:
                 if(runtime.milliseconds() > 500){
-                    clawTarget = hardware.clawState("closed");
+                    clawTarget = hardware.clawState(false);
                     intakePower = hardware.intakePowerSet(false,false);
                     armsTarget = hardware.armsPos("in"); //just in case um
                     runtime.reset();
@@ -215,7 +223,7 @@ public class StateMachines {
                 }
                 break;
             case SPECIMEN_GRAB:
-                clawTarget = hardware.clawState("closed");
+                clawTarget = hardware.clawState(false);
                 if(runtime.milliseconds() > 200){
                     horiTarget = hardware.horiSlidesSet(200);
                     if(runtime.milliseconds()>500){
@@ -239,7 +247,7 @@ public class StateMachines {
 
             case ARMS_OUT:
                 if(gamepad1.right_bumper) {
-                    clawTarget = hardware.clawState("open");
+                    clawTarget = hardware.clawState(true);
                     runtime.reset();
                     robotState = robotStates.LIFT_DUMP;
                 }
@@ -248,7 +256,7 @@ public class StateMachines {
             case SPECIMEN_RELEASE:
                 armsTarget = hardware.armsPos(0.6725);
                 if(runtime.milliseconds() > 500){
-                    clawTarget = hardware.clawState("open");
+                    clawTarget = hardware.clawState(true);
                     vertTarget = hardware.vertSlidesSet(1200);
                     armsTarget = hardware.armsPos("in");
                     runtime.reset();
@@ -267,13 +275,38 @@ public class StateMachines {
             case LIFT_RETRACT:
 
                 if(runtime.milliseconds() > 750){
-                    clawTarget = hardware.clawState("closed");
+                    clawTarget = hardware.clawState(false);
                     vertTarget = hardware.vertSlidesSet(0);
                     robotState = robotStates.INTAKE_START;
                 }
                 break;
             case MANUAL:
-                horiTarget = hardware.horiSlidesMan(-gamepad2.left_stick_y);
+
+
+                //GAMEPAD 1 MANUAL
+                boolean armsReady = (prevState.equals(robotStates.ARMS_OUT) || prevState.equals(robotStates.INTAKE_START) || prevState.equals(robotStates.LIFT_GRAB));
+
+                if(gamepad1.right_trigger > 0.5&& armsReady){
+                    armsTarget = hardware.armsPos(armsTarget+0.001);
+                }
+                else if(gamepad1.left_trigger > 0.5 && armsReady){
+                    armsTarget = hardware.armsPos(armsTarget-0.001);
+                }
+                if(armsReady && gamepad1.b){
+                    clawTarget = hardware.clawState(false);
+                }
+                else if(armsReady && gamepad1.a){
+                    clawTarget = hardware.clawState(true);
+                }
+
+                if(gamepad1.dpad_left&&armsReady){
+                    vertTarget = hardware.liftMan(0.5, false,false);
+                }
+                else if(gamepad1.dpad_right&&armsReady){
+                    vertTarget = hardware.liftMan(-0.5,false,false);
+                }
+
+                //GAMEPAD2 INPUTS
                 if(gamepad2.dpad_right){
                     intakeFlipTarget = hardware.intakePosSet(true);
                     intakePower = hardware.intakePowerSet(true, false);
@@ -286,32 +319,13 @@ public class StateMachines {
                     intakeFlipTarget = hardware.intakePosSet(true);
                     intakePower = hardware.intakePowerSet(false,false);
                 }
-                boolean armsReady = (prevState.equals(robotStates.ARMS_OUT) || prevState.equals(robotStates.INTAKE_START) || prevState.equals(robotStates.LIFT_GRAB));
-                if(gamepad1.right_trigger > 0.5&& armsReady){
-                    armsTarget = hardware.armsPos(armsTarget+0.001);
-                }
-                else if(gamepad1.left_trigger > 0.5 && armsReady){
-                    armsTarget = hardware.armsPos(armsTarget-0.001);
-                }
-                if(armsReady && gamepad1.b){
-                    clawTarget = hardware.clawState("closed");
-                }
-                else if(armsReady && gamepad1.a){
-                    clawTarget = hardware.clawState("open");
-                }
-
-                if(gamepad1.dpad_left&&armsReady){
-                    vertTarget = hardware.liftMan(0.5, false,false);
-                }
-                else if(gamepad1.dpad_right&&armsReady){
-                    vertTarget = hardware.liftMan(-0.5,false,false);
-                }
-
+                horiTarget = hardware.horiSlidesMan(-gamepad2.left_stick_y);
                 // program manual slide control + claaw
                 robotState = prevState;
                 break;
+
             case IDLE:
-                clawTarget = hardware.clawState("open");
+                clawTarget = hardware.clawState(true);
                 armsTarget = hardware.armsPos("in");
                 intakeFlipTarget = hardware.intakePosSet(true);
                 intakePower = hardware.intakePowerSet(true, false);

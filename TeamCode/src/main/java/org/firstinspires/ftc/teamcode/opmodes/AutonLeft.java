@@ -5,19 +5,19 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.*;
-import org.firstinspires.ftc.teamcode.hardware.Onbot_HardwareITD;
+import org.firstinspires.ftc.teamcode.hardware.HardwareITD;
 import org.firstinspires.ftc.teamcode.statemachines.StateMachines;
 
 
 @Autonomous(name="AutonLeft", group= "Autonomous")
 public class AutonLeft extends LinearOpMode {
-    Onbot_HardwareITD robot = null;
+    HardwareITD robot = null;
     StateMachines robotState = null;
     ElapsedTime runtime = new ElapsedTime();
 
     @Override
     public void runOpMode() {
-        robot = new Onbot_HardwareITD();
+        robot = new HardwareITD();
         robotState = new StateMachines(robot);
         robot.initDrive(this);
         waitForStart();
